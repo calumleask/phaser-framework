@@ -11,17 +11,38 @@ export type InputManagerConfig = {
 };
 
 export class InputManager extends EventEmitter {
+    keys: Set<number>;
 
     constructor(config: InputManagerConfig) {
         super();
 
+        this.keys = new Set();
+
         config.keys.forEach((pair: KeyNamePair) => {
-            config.input.keyboard.on("keydown-" + pair.key, (event: any) => {
-                this.fire(pair.name, { event });
-            });
-            config.input.keyboard.on("keyup-" + pair.key, (event: any) => {
-                this.fire(pair.name, { event });
-            });
+            config.input.keyboard.on("keydown-" + pair.key, (event: any) => { this.onKeyDown(event, pair.name); });
+            config.input.keyboard.on("keyup-" + pair.key, (event: any) => { this.onKeyUp(event, pair.name); });
         });
+    }
+
+    onKeyDown(event: any, keyName: string) {
+        const down: boolean = true;
+        const up: boolean = false;
+        const pressed: boolean = !this.keys.has(event.code);
+        const released: boolean = false;
+        if (pressed) {
+            this.keys.add(event.code);
+        }
+        this.fire(keyName, { event, down, up, pressed, released });
+    }
+
+    onKeyUp(event: any, keyName: string) {
+        const down: boolean = false;
+        const up: boolean = true;
+        const pressed: boolean = false;
+        const released: boolean = this.keys.has(event.code);
+        if (released) {
+            this.keys.delete(event.code);
+        }
+        this.fire(keyName, { event, down, up, pressed, released });
     }
 }
