@@ -14,6 +14,8 @@ declare namespace phfw {
     namespace Input {
         class InputManager extends Core.EventEmitter {
             constructor(config: InputManagerConfig);
+            //Temp method
+            getActivePointer(): any;
         }
         type InputManagerConfig = {
             input: any;

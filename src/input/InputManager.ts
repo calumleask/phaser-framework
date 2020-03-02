@@ -12,11 +12,13 @@ export type InputManagerConfig = {
 
 export class InputManager extends EventEmitter {
     keys: Set<number>;
+    input: any;
 
     constructor(config: InputManagerConfig) {
         super();
 
         this.keys = new Set();
+        this.input = config.input;
 
         config.keys.forEach((pair: KeyNamePair) => {
             config.input.keyboard.on("keydown-" + pair.key, (event: any) => { this.onKeyDown(event, pair.name); });
@@ -44,5 +46,9 @@ export class InputManager extends EventEmitter {
             this.keys.delete(event.code);
         }
         this.fire(keyName, { event, down, up, pressed, released });
+    }
+    // Temp method
+    getActivePointer(): any {
+        return this.input.activePointer;
     }
 }
