@@ -9,6 +9,13 @@ declare namespace phfw {
             off(type: string, callback: Function): void;
             fire(type: string, data: Object): void;
         }
+
+        class GameScaleManager {
+            constructor(viewWidth: number, viewHeight: number, devicePixelRatio: number, maxTargetPixelsNarrowest: number, gameUnitsNarrowest: number);
+            gameUnitToPixel(x: number): number;
+            gameUnitsToPixels(array: number[]): number[];
+            gameUnitCoordToPixelCoord(x: number, y: number): number[];
+        }
     }
     
     namespace Input {
