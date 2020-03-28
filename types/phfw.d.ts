@@ -11,6 +11,7 @@ declare namespace phfw {
         }
 
         class GameScaleManager {
+            readonly assetScaleRatio: number;
             constructor(viewWidth: number, viewHeight: number, devicePixelRatio: number, maxTargetPixelsNarrowest: number, gameUnitsNarrowest: number);
             gameUnitToPixel(x: number): number;
             gameUnitsToPixels(array: number[]): number[];
@@ -31,6 +32,28 @@ declare namespace phfw {
         type KeyNamePair = {
             key: string, name: string
         };
+    }
+
+    namespace Objects {
+        type ButtonStyle = {
+            textColor?: string;
+            downTextColor?: string;
+        }
+        class TextButton extends Phaser.GameObjects.Text {
+            onSelect: () => void;
+            constructor(scene: Phaser.Scene, x: number, y: number, text: string | string[], style: ButtonStyle);
+        }
+    }
+
+    type GameContext = {
+        scaling: phfw.Core.GameScaleManager;
+    };
+
+    class Scene extends Phaser.Scene {
+        protected key: string;
+        protected context: GameContext;
+        constructor(key: string);
+        init(context: GameContext): void;
     }
 }
 
