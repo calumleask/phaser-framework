@@ -18,19 +18,17 @@ const config = {
   module : {
     rules : [
       {
-        test : /\.js$/,
+        test : /\.(js|ts)$/,
         include : SRC_DIR,
         use: {
           loader: "babel-loader",
           options: {
-            presets: ["@babel/preset-env"]
+            presets: [
+              "@babel/preset-env",
+              "@babel/preset-typescript"
+            ]
           }
         }
-      },
-      {
-        test : /\.ts$/,
-        include : SRC_DIR,
-        loader: "ts-loader"
       }
     ]
   },
