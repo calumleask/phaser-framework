@@ -27,10 +27,10 @@ export class InputManager extends EventEmitter {
     }
 
     onKeyDown(event: any, keyName: string) {
-        const down: boolean = true;
-        const up: boolean = false;
-        const pressed: boolean = !this.keys.has(event.code);
-        const released: boolean = false;
+        const down = true;
+        const up = false;
+        const pressed = !this.keys.has(event.code);
+        const released = false;
         if (pressed) {
             this.keys.add(event.code);
         }
@@ -38,10 +38,10 @@ export class InputManager extends EventEmitter {
     }
 
     onKeyUp(event: any, keyName: string) {
-        const down: boolean = false;
-        const up: boolean = true;
-        const pressed: boolean = false;
-        const released: boolean = this.keys.has(event.code);
+        const down = false;
+        const up = true;
+        const pressed = false;
+        const released = this.keys.has(event.code);
         if (released) {
             this.keys.delete(event.code);
         }
