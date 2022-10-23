@@ -1,70 +1,84 @@
-import "phaser";
+import 'phaser';
 
 type ButtonStyle = {
-    textColor: string;
-    downTextColor?: string;
-}
+  textColor: string;
+  downTextColor?: string;
+};
 
 export class TextButton extends Phaser.GameObjects.Text {
-    private _isDown: boolean;
-    private _textColor: string;
-    private _downTextColor: string;
-    onSelect?: () => void;
- 
-    constructor(scene: Phaser.Scene, x: number, y: number, text: string | string[], style: ButtonStyle) {
-        super(scene, x, y, text, {});
+  private _isDown: boolean;
+  private _textColor: string;
+  private _downTextColor: string;
+  onSelect?: () => void;
 
-        this._isDown = false;
-        this._textColor = style.textColor;
-        this._downTextColor = style.downTextColor || style.textColor;
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    text: string | string[],
+    style: ButtonStyle,
+  ) {
+    super(scene, x, y, text, {});
 
-        this.setInteractive()
-            .on("pointerover", () => { this.onPointerOver(); })
-            .on("pointerout", () => { this.onPointerOut(); })
-            .on("pointerdown", () => { this.onPointerDown(); })
-            .on("pointerup", () => { this.onPointerUp(); });
+    this._isDown = false;
+    this._textColor = style.textColor;
+    this._downTextColor = style.downTextColor || style.textColor;
 
-        this.setColor(this._textColor);
+    this.setInteractive()
+      .on('pointerover', () => {
+        this.onPointerOver();
+      })
+      .on('pointerout', () => {
+        this.onPointerOut();
+      })
+      .on('pointerdown', () => {
+        this.onPointerDown();
+      })
+      .on('pointerup', () => {
+        this.onPointerUp();
+      });
+
+    this.setColor(this._textColor);
+  }
+
+  onPointerOver(): void {
+    console.log('pointerover');
+  }
+
+  onPointerOut(): void {
+    console.log('pointerout');
+    if (this._isDown) {
+      this.setUp();
     }
+  }
 
-    onPointerOver(): void {
-        console.log("pointerover");
-    }
+  onPointerDown(): void {
+    console.log('pointerdown');
+    this.setDown();
+  }
 
-    onPointerOut(): void {
-        console.log("pointerout");
-        if (this._isDown) {
-            this.setUp();
-        }
+  onPointerUp(): void {
+    console.log('pointerup');
+    if (this._isDown) {
+      this.setUp();
+      this.select();
     }
+  }
 
-    onPointerDown(): void {
-        console.log("pointerdown");
-        this.setDown();
-    }
+  setDown(): void {
+    this._isDown = true;
+    this.setColor(this._downTextColor);
+  }
 
-    onPointerUp(): void {
-        console.log("pointerup");
-        if (this._isDown) {
-            this.setUp();
-            this.select();
-        }
-    }
+  setUp(): void {
+    this._isDown = false;
+    this.setColor(this._textColor);
+  }
 
-    setDown(): void {
-        this._isDown = true;
-        this.setColor(this._downTextColor);
+  select(): void {
+    console.log('select');
+    if (this.onSelect) {
+      this.onSelect();
     }
-
-    setUp(): void {
-        this._isDown = false;
-        this.setColor(this._textColor);
-    }
-
-    select(): void {
-        console.log("select");
-        if (this.onSelect) {
-            this.onSelect();
-        }
-    }
+  }
 }

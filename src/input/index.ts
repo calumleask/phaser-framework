@@ -1,1 +1,1 @@
-export { InputManager } from "./InputManager";
+export { InputManager } from './InputManager';

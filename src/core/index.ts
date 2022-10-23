@@ -1,2 +1,2 @@
-export { EventEmitter } from "./EventEmitter";
-export { GameScaleManager } from "./GameScaleManager";
+export { EventEmitter } from './EventEmitter';
+export { GameScaleManager } from './GameScaleManager';
