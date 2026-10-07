@@ -10,6 +10,16 @@ Phaser 4.2.1 is the current stable release, confirmed by both the [official stab
 
 The original audit and proposed sequence below are retained for context. The implementation updates record which checkpoints have since been completed. Recheck registry metadata, peer ranges, security advisories, and release notes before future dependency changes.
 
+## Implementation update: task 04, 8 October 2026
+
+The legacy `.eslintrc` setup has been replaced with ESLint **10.12.0** flat config in `eslint.config.mjs`, following the [ESLint configuration guide](https://eslint.org/docs/latest/use/configure/configuration-files) and [typescript-eslint quickstart](https://typescript-eslint.io/getting-started/). The exact release versions were checked against npm metadata before installation; ESLint 10 supports the repository's Node 24 toolchain, and typescript-eslint 8.71.1 supports ESLint 10 and TypeScript 5.9.3.
+
+- `typescript-eslint` now supplies the TypeScript parser/plugin as one direct dependency; `@eslint/js` provides the core recommended rules. The existing TypeScript recommended rules, `no-unused-vars` argument convention, and `consistent-type-definitions` rule remain enabled. The config limits linting to `src/**/*.ts`, retains the previous ignores, and declares the two browser globals used by source.
+- Removed the obsolete `.eslintrc` and `.eslintignore`, as well as direct `@typescript-eslint/parser`, `@typescript-eslint/eslint-plugin`, and `eslint-config-prettier` dependencies. Formatting remains a separate Prettier pass, so ESLint no longer duplicates its semicolon/quote formatting rules. Kept `.prettierrc` and its existing style; no `.prettierignore` existed. Babel remains required by the current Webpack TypeScript build and was not changed.
+- Added `lint`, `lint:fix`, and `format:check` scripts, updated `test` to call `lint`, and retained `format` for writes. Prettier 3.9.9 required a formatting adjustment only in `InputManager.ts`; other source files were unchanged.
+
+Validation under Node 24.21.0/npm 12.2.0: clean `npm ci` passed with zero audit findings; `npm run lint`, `npm run format:check`, `npm run typecheck`, and `npm run build` passed. Build output still reports the three Phaser bundle-size/performance warnings. `npm test` ran lint and typecheck successfully, then exited 1 at the existing `test:unit` placeholder (`Error: no test specified`); no test runner was added in this tooling task.
+
 ## Implementation update: task 03, 8 October 2026
 
 Phaser has been migrated from **3.55.2 to 4.2.1**, with **3.90.0** installed and validated as an intermediate checkpoint. The [official stable download](https://phaser.io/download/release/v4.2.1) still identifies 4.2.1 as stable at implementation time. `package.json` pins that exact version; npm updated `package-lock.json`, including Phaser's `eventemitter3` 5 dependency and removal of its former `path` chain.
