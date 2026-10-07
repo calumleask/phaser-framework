@@ -6,19 +6,19 @@ type KeyNamePair = {
 };
 
 export type InputManagerConfig = {
-  input: any;
+  input: Phaser.Input.InputPlugin;
   keys: KeyNamePair[];
 };
 
 export class InputManager extends EventEmitter {
-  keys: Set<number>;
-  input: any;
+  private _keys: Set<number>;
+  private _input: Phaser.Input.InputPlugin;
 
   constructor(config: InputManagerConfig) {
     super();
 
-    this.keys = new Set();
-    this.input = config.input;
+    this._keys = new Set();
+    this._input = config.input;
 
     config.keys.forEach((pair: KeyNamePair) => {
       config.input.keyboard.on('keydown-' + pair.key, (event: any) => {
@@ -30,29 +30,29 @@ export class InputManager extends EventEmitter {
     });
   }
 
-  onKeyDown(event: any, keyName: string) {
+  onKeyDown(event: any, keyName: string): void {
     const down = true;
     const up = false;
-    const pressed = !this.keys.has(event.code);
+    const pressed = !this._keys.has(event.code);
     const released = false;
     if (pressed) {
-      this.keys.add(event.code);
+      this._keys.add(event.code);
     }
     this.fire(keyName, { event, down, up, pressed, released });
   }
 
-  onKeyUp(event: any, keyName: string) {
+  onKeyUp(event: any, keyName: string): void {
     const down = false;
     const up = true;
     const pressed = false;
-    const released = this.keys.has(event.code);
+    const released = this._keys.has(event.code);
     if (released) {
-      this.keys.delete(event.code);
+      this._keys.delete(event.code);
     }
     this.fire(keyName, { event, down, up, pressed, released });
   }
-  // Temp method
-  getActivePointer(): any {
-    return this.input.activePointer;
+
+  getActivePointer(): Phaser.Input.Pointer {
+    return this._input.activePointer;
   }
 }
