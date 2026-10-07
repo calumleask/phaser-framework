@@ -11,7 +11,7 @@ export type InputManagerConfig = {
 };
 
 export class InputManager extends EventEmitter {
-  private _keys: Set<number>;
+  private _keys: Set<string>;
   private _input: Phaser.Input.InputPlugin;
 
   constructor(config: InputManagerConfig) {
@@ -21,16 +21,19 @@ export class InputManager extends EventEmitter {
     this._input = config.input;
 
     config.keys.forEach((pair: KeyNamePair) => {
-      config.input.keyboard.on('keydown-' + pair.key, (event: any) => {
-        this.onKeyDown(event, pair.name);
-      });
-      config.input.keyboard.on('keyup-' + pair.key, (event: any) => {
+      config.input.keyboard.on(
+        'keydown-' + pair.key,
+        (event: KeyboardEvent) => {
+          this.onKeyDown(event, pair.name);
+        },
+      );
+      config.input.keyboard.on('keyup-' + pair.key, (event: KeyboardEvent) => {
         this.onKeyUp(event, pair.name);
       });
     });
   }
 
-  onKeyDown(event: any, keyName: string): void {
+  onKeyDown(event: KeyboardEvent, keyName: string): void {
     const down = true;
     const up = false;
     const pressed = !this._keys.has(event.code);
@@ -41,7 +44,7 @@ export class InputManager extends EventEmitter {
     this.fire(keyName, { event, down, up, pressed, released });
   }
 
-  onKeyUp(event: any, keyName: string): void {
+  onKeyUp(event: KeyboardEvent, keyName: string): void {
     const down = false;
     const up = true;
     const pressed = false;

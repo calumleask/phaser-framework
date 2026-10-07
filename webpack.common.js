@@ -1,7 +1,5 @@
 const path = require('path');
 
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-
 const SRC_DIR = path.resolve(__dirname, 'src');
 const BUILD_DIR = path.resolve(__dirname, 'dist');
 
@@ -15,6 +13,7 @@ module.exports = {
     filename: '[name].js',
     library: 'phfw',
     libraryTarget: 'umd',
+    clean: true,
   },
 
   module: {
@@ -26,8 +25,6 @@ module.exports = {
       },
     ],
   },
-
-  plugins: [new CleanWebpackPlugin()],
 
   resolve: {
     extensions: ['.ts', '.js'],

@@ -10,6 +10,49 @@ Phaser 4.2.1 is the current stable release, confirmed by both the [official stab
 
 Versions below are a dated proposal, not a claim that this combination has already been installed or tested. Recheck registry metadata, peer ranges, security advisories, and release notes immediately before implementation.
 
+## Implementation update: task 02, 7 October 2026
+
+The sections below this update retain the **pre-change audit** as a historical baseline. The following build and TypeScript work has now been implemented; the Phaser migration has not started.
+
+### Completed
+
+- Pinned the tool runtime with `.nvmrc` (**Node 24.21.0**), `packageManager: npm@12.2.0`, Node/npm engine ranges, and `.npmrc` engine enforcement. Because the machine's installed Node is 22.21.1/npm 10.9.4, verification used a temporary Node 24.21.0/npm 12.2.0 toolchain. This changed project requirements, not the machine-wide installation. npm regenerated `package-lock.json` through normal install/uninstall commands; it remains lockfile version 2 and a clean `npm ci` succeeds.
+- Upgraded TypeScript to **5.9.3** and made `tsconfig.json` a strict, explicit typecheck config: ES2022/ESNext with Bundler resolution, browser libraries, no ambient Node types, no emit, exact optional properties, checked index access, required override annotations where applicable, fallthrough checking, consistent casing, isolated modules, and verbatim module syntax. `tsconfig.types.json` provides a separate declaration-only build. Phaser 3.55.2's declaration for `ParseXML` still references the removed browser-global `ActiveXObject`; the built-in TypeScript `ScriptHost` library supplies that legacy type until Phaser is upgraded. No library errors are suppressed with `skipLibCheck`.
+- Changed only the source typings needed to pass the stricter checks: `InputManager` now accepts native `KeyboardEvent`s and stores string `event.code` values; `EventEmitter` lets TypeScript narrow potentially absent listener arrays. These edits do not change emitted event payloads or selection behavior. The already staged user changes in `InputManager` remain staged and were not replaced.
+- Updated the build stack to **Babel 7.29.7** (core and both presets), babel-loader **10.1.1**, Webpack **5.111.1**, webpack-cli **7.2.3**, webpack-merge **6.0.1**, and terser-webpack-plugin **5.6.1**. Phaser remains locked at **3.55.2**. Retained the UMD `phfw` output, bundled Phaser, existing development inline map, production external map, and Terser license extraction. Webpack's `output.clean` replaces `clean-webpack-plugin`; the two sequential script uses no longer require `npm-run-all`. The standalone `clean` command now uses a cross-platform Node command with a workspace target check.
+- Added `typecheck`; `build` now emits the production bundle **then** declarations, so its final `dist/` contains both. `start` still invokes the existing watch build. Added a `files` list containing `dist`, `src`, and `types`: a dry-run pack before that change excluded `dist/` because npm was falling back to `.gitignore`, leaving the declared `main` file absent. The current dry-run pack includes `phfw.js`, its map and license text, nine emitted declaration files, the raw source entry referenced by `module`, and the handwritten public declaration referenced by `types`.
+- Removed unused `@types/node`: there is no TypeScript Node source/config file and browser source now opts out of ambient Node types. Upgraded the TypeScript ESLint parser and plugin to **8.71.1** to support TypeScript 5.9.3. ESLint **8.57.1** is an interim version compatible with the existing `.eslintrc`; the complete ESLint/Prettier configuration migration belongs to task 04.
+
+No dev server, HTML bootstrap, static asset import, asset-copy step, `.env` convention, or game configuration exists in this library. `dev` still produces a development UMD bundle, and `watch` still recompiles it. The existing Babel environment preset and Webpack development/production modes remain in place; browser targets have not been invented without a browser support policy. Asset handling remains unchanged because there are no assets to transform. The package file list now ensures existing build artifacts are included when packed.
+
+### Deviations and remaining work
+
+- The original sequence preferred tests and a browser host fixture before tooling changes. The repository still has only a deliberate `test:unit` failure, so task 02 established command/type/build/package checks but did not claim runtime or browser verification. Add meaningful tests and a representative host fixture before Phaser 3.90/4.x work.
+- ESLint 10/flat config, Prettier 3, and `eslint-config-prettier` 10 are deferred to the dedicated code-quality task. ESLint 8.57.1 is deprecated upstream, although its current combination passes lint and audit. Babel 8 and TypeScript 6/7 remain separate decisions for their documented compatibility reasons. The `@types/node` 24 proposal was dropped because no Node TypeScript declarations are consumed.
+- Package entrypoints and public declarations still disagree in the ways described below. The new pack list restores the referenced files but does not repair their export/type contract. Do that with consumer fixtures and a framework versioning decision before release. `module` still points to raw TypeScript; it was preserved intentionally in this tooling task.
+- A production build ends with declarations present. A later standalone `dev` or watch compilation can clean them because Webpack cleans `dist`; run `build` last when preparing a package. Future packaging work should make this artifact ownership more robust.
+- The Node 24 toolchain was verified locally from a temporary installation. CI configuration, a browser support policy/targets, a development server or demo host, runtime smoke tests, and the Phaser upgrade remain future work. The installed machine-wide Node/npm versions were not altered.
+
+### Validation after task 02
+
+Commands ran under temporary Node 24.21.0/npm 12.2.0 using `npm-cli.js` with that Node binary and its `bin` directory on `PATH`. This avoids the local PowerShell `npm.ps1` signing restriction and ensures lifecycle scripts use Node 24. The table records the final state after package updates; earlier intermediate lint/type failures were corrected before these checks.
+
+| Command | Result |
+| --- | --- |
+| `npm ci` | Pass; 348 packages installed, 0 audit findings. |
+| `npm ls --depth=0` | Pass; direct dependencies resolve and Phaser is 3.55.2. |
+| `npm run test:lint` | Pass; zero errors and zero warnings. |
+| `npm run typecheck` | Pass with the strict TypeScript 5.9.3 config. |
+| `npm test` | **Fails only at `test:unit`**, which still prints `Error: no test specified` and exits 1; preceding lint/typecheck pass. |
+| `npm run dev` | Pass; Webpack emits the development bundle. |
+| `npm run build` | Pass; emits ~1.01 MiB `phfw.js`, external source map, 4,523-byte extracted license text, and nine declaration files. Webpack still reports its three existing size/performance warnings because Phaser is bundled. |
+| `npm pack --dry-run --json` | Pass; confirms the required JavaScript, source map, license, source entry, and declaration paths are in the prospective package. |
+| `npm audit --json` | Pass; zero reported vulnerabilities. |
+| `npm outdated` | Exits 1 because intentionally deferred packages remain behind current latest releases: Phaser, Babel 8, TypeScript 7, ESLint 10, Prettier 3, and `eslint-config-prettier` 10. |
+| Prettier `--check src` | Pass; all source files retain the existing style. |
+
+Production output was also inspected directly: the external source map parses as version 3 and contains the Phaser source, `phfw.js` references that map, the license file is present, and the lockfile still resolves Phaser 3.55.2. The build is not a browser runtime test.
+
 ## Inspection scope and current state
 
 Inspected every repository source file, the complete task and local `AGENTS.md`, `package.json`, lockfile, all three Webpack configurations, `tsconfig.json`, Babel configuration, lint/format configuration, ignore files, handwritten public declarations, generated declarations, npm dependency trees, staged changes, and tracked-file inventory. HEAD is `fbd0f11`. There is no README, existing framework documentation, example game, asset directory, test suite, test runner configuration, CI workflow, browser support policy, Node version pin, or npm engine declaration in this checkout. The task files and repository guidance are the only existing Markdown documentation.

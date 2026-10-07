@@ -19,7 +19,7 @@ export class EventEmitter {
   }
 
   on(type: string, callback: EventCallback): void {
-    let listeners: EventCallback[] = this._events[type];
+    let listeners = this._events[type];
     if (!listeners) {
       listeners = [];
       this._events[type] = listeners;
@@ -31,7 +31,7 @@ export class EventEmitter {
   }
 
   off(type: string, callback: EventCallback): void {
-    const listeners: EventCallback[] = this._events[type];
+    const listeners = this._events[type];
     if (!listeners) return;
     for (let i: number = listeners.length - 1; i >= 0; --i) {
       if (listeners[i] === callback) {
@@ -42,7 +42,7 @@ export class EventEmitter {
   }
 
   fire(type: string, data: Data): void {
-    const listeners: EventCallback[] = this._events[type];
+    const listeners = this._events[type];
     if (!listeners) return;
     listeners.forEach(callback => {
       callback({
