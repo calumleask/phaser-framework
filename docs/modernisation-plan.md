@@ -10,6 +10,24 @@ Phaser 4.2.1 is the current stable release, confirmed by both the [official stab
 
 The original audit and proposed sequence below are retained for context. The implementation updates record which checkpoints have since been completed. Recheck registry metadata, peer ranges, security advisories, and release notes before future dependency changes.
 
+## Implementation update: task 05, 8 October 2026
+
+The dependency cleanup found **no unused direct package and no reported security advisory** in the current lockfile. No package was upgraded, replaced, or removed during this task. The npm-owned lockfile and build configuration remain unchanged; making an unneeded dependency change would add migration risk without resolving a finding.
+
+| Direct dependencies | Verified use and decision |
+| --- | --- |
+| `phaser` | Runtime scene, text object, and input types/behavior. Keep the verified 4.2.1 target. |
+| `@babel/core`, `@babel/preset-env`, `@babel/preset-typescript`, `babel-loader` | Webpack's Babel loader reads `.babelrc` to strip TypeScript and transpile browser output. Keep the coordinated Babel 7.29.7 set and loader 10.1.1. |
+| `webpack`, `webpack-cli`, `webpack-merge`, `terser-webpack-plugin` | Development/production build scripts, shared config composition, and explicit production minifier/license extraction. Keep. |
+| `eslint`, `@eslint/js`, `typescript-eslint`, `prettier` | Flat lint config and lint/format scripts. Keep the task 04 versions. The combined `typescript-eslint` package owns its parser/plugin dependencies. |
+| `typescript` | Strict source typecheck and declaration emit. Keep 5.9.3. |
+
+Final `npm outdated` lists only four direct packages: `@babel/core`, `@babel/preset-env`, and `@babel/preset-typescript` at 7.29.7 versus latest 8.0.7, plus TypeScript at 5.9.3 versus latest 7.0.2. Babel 8 is a coordinated major migration: its [official guide](https://babeljs.io/docs/v8-migration) documents ESM-only packages, a changed default browser target, and TypeScript transform changes. This repository has no browser target policy or representative consumer comparison yet, so keep Babel 7 until those behavior changes can be reviewed together. `babel-loader` 10.1.1 permits Babel 8 in its peer range, but that alone does not prove unchanged browser output. TypeScript 7 is outside the installed `typescript-eslint` 8.71.1 peer range (`>=4.8.4 <6.1.0`); do not bypass that constraint with forced installation. All other direct dependencies are current according to `npm outdated`.
+
+The full dependency tree resolves (`npm ls --all`), and a clean `npm ci` installed 319 packages with no deprecation warning or audit finding. Both full `npm audit` and production-only `npm audit --omit=dev` report **zero vulnerabilities**. No override, forced audit fix, or package-manager change was applied. The audit result describes reported advisories in this lockfile; it does not replace the consumer/browser compatibility checks listed later in this plan.
+
+Validation after clean install: `npm run dev`, `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run build`, and `npm pack --dry-run --json` passed. The packed file list includes the production bundle, generated declarations, source entry, and public declaration. Production Webpack still reports its three existing bundle-size/performance warnings. `npm test` passes lint and typecheck, then exits 1 at the pre-existing `test:unit` placeholder (`Error: no test specified`). The unit-test gap is unresolved and is separate from the dependency/security review.
+
 ## Implementation update: task 04, 8 October 2026
 
 The legacy `.eslintrc` setup has been replaced with ESLint **10.12.0** flat config in `eslint.config.mjs`, following the [ESLint configuration guide](https://eslint.org/docs/latest/use/configure/configuration-files) and [typescript-eslint quickstart](https://typescript-eslint.io/getting-started/). The exact release versions were checked against npm metadata before installation; ESLint 10 supports the repository's Node 24 toolchain, and typescript-eslint 8.71.1 supports ESLint 10 and TypeScript 5.9.3.
