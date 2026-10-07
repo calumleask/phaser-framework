@@ -1,4 +1,5 @@
 import { EventEmitter } from '../core/EventEmitter';
+import type * as Phaser from 'phaser';
 
 type KeyNamePair = {
   key: string;
@@ -20,17 +21,17 @@ export class InputManager extends EventEmitter {
     this._keys = new Set();
     this._input = config.input;
 
-    config.keys.forEach((pair: KeyNamePair) => {
-      config.input.keyboard.on(
-        'keydown-' + pair.key,
-        (event: KeyboardEvent) => {
+    const keyboard = config.input.keyboard;
+    if (keyboard) {
+      config.keys.forEach((pair: KeyNamePair) => {
+        keyboard.on('keydown-' + pair.key, (event: KeyboardEvent) => {
           this.onKeyDown(event, pair.name);
-        },
-      );
-      config.input.keyboard.on('keyup-' + pair.key, (event: KeyboardEvent) => {
-        this.onKeyUp(event, pair.name);
+        });
+        keyboard.on('keyup-' + pair.key, (event: KeyboardEvent) => {
+          this.onKeyUp(event, pair.name);
+        });
       });
-    });
+    }
   }
 
   onKeyDown(event: KeyboardEvent, keyName: string): void {

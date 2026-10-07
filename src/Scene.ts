@@ -1,7 +1,8 @@
-import 'phaser';
+import * as Phaser from 'phaser';
+import type { GameScaleManager } from './core/GameScaleManager';
 
 type GameContext = {
-  scaling: phfw.Core.GameScaleManager;
+  scaling: GameScaleManager;
 };
 
 export class Scene extends Phaser.Scene {
