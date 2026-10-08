@@ -11,7 +11,6 @@ module.exports = {
   output: {
     path: BUILD_DIR,
     filename: '[name].js',
-    clean: true,
   },
 
   module: {

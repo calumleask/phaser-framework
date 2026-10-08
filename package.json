@@ -18,7 +18,7 @@
     "dev": "webpack --config webpack.dev.js --progress",
     "watch": "webpack --config webpack.dev.js --progress --watch",
     "start": "npm run watch",
-    "build": "webpack --config webpack.prod.js --progress && webpack --config webpack.esm.js --progress && npm run ts:defs",
+    "build": "npm run clean && webpack --config webpack.prod.js && webpack --config webpack.esm.js && npm run ts:defs",
     "ts:defs": "tsc -p tsconfig.types.json",
     "format": "prettier --write src test",
     "format:check": "prettier --check src test",

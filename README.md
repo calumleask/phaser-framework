@@ -34,7 +34,7 @@ npm run clean         # remove dist
 
 `npm run build` writes `dist/phfw.js` (UMD), `dist/phfw.mjs` (ESM), and generated declarations. Phaser is supplied by the host game: load Phaser before the UMD script, then access `phfw.default`; bundlers can use the built ESM entry and a default import. The package pins the verified Phaser peer version to 4.2.1. `npm run verify:consumer` builds, installs a tarball into an isolated fixture, typechecks a consumer, and runs UMD and bundled WebGL checks in Chrome or Edge. Set `PHFW_CHROME_PATH` if the browser is in a nonstandard location.
 
-Webpack cleans `dist/` when the UMD build runs, so use the production `build` command last when preparing package artifacts. `npm run dev` builds a library bundle; it does not start a development server.
+The production build cleans `dist/` once, then emits both JavaScript bundles, external source maps, and declarations. Run it last when preparing package artifacts; `dev` and `watch` only update the UMD bundle and do not clean old production files. `npm run dev` builds a library bundle; it does not start a development server. See [Architecture](docs/architecture.md#build-and-execution) for the builder decision and the sibling game's copy contract.
 
 ## Repository layout
 

@@ -14,7 +14,7 @@ Use npm for dependency changes and commit the synchronised `package-lock.json`. 
 
 - `npm run dev` creates the development UMD bundle in `dist/`.
 - `npm run watch` or `npm start` rebuilds that bundle as files change.
-- `npm run build` creates production UMD and ESM bundles, then emits declarations.
+- `npm run build` cleans `dist/`, creates production UMD and ESM bundles with external source maps, then emits declarations.
 - `npm run verify:consumer` builds, packs, installs, typechecks, and runs the UMD and bundled consumer fixture in Chrome or Edge. Set `PHFW_CHROME_PATH` if browser discovery fails.
 - `npm test` runs lint, typecheck, then Node unit tests; `npm run test:unit` runs only the unit tests.
 - `npm run lint` checks `src` and `test`; `npm run lint:fix` applies safe ESLint fixes.
@@ -22,7 +22,7 @@ Use npm for dependency changes and commit the synchronised `package-lock.json`. 
 - `npm run typecheck` runs TypeScript without output. `npm run ts:defs` emits declarations.
 - `npm run clean` removes `dist/`.
 
-The UMD Webpack build cleans `dist`; the following ESM build preserves its output. Run `npm run build` last before inspecting or packing production artifacts. `dev` and `watch` compile a UMD library rather than serving a game. The small host under `test/consumer/` is only for packed-package validation.
+The production script cleans `dist` once before both Webpack outputs and declaration generation, so stale files cannot survive a successful build. Run `npm run build` last before inspecting or packing production artifacts. `dev` and `watch` compile a UMD library rather than serving a game; they leave any earlier ESM and declaration files on disk, which should not be treated as a fresh production build. The small host under `test/consumer/` is only for packed-package validation.
 
 ## Extending the framework
 
