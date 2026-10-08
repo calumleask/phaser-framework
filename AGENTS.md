@@ -1,111 +1,37 @@
-# AGENTS.md
+# Agent instructions
 
-## Purpose
+This repository is a reusable Phaser 4.2.1 framework written in TypeScript. The consuming game owns `Phaser.Game`, game configuration, scenes, assets, and optional systems such as physics or audio. Keep changes focused on the framework's actual source; do not invent a bootstrap or game-specific architecture.
 
-This repository contains a reusable Phaser game framework written in TypeScript.
+## Repository map
 
-The framework provides the foundation for building Phaser games and should remain:
+- `src/` — framework entry point and scene, core utilities, input adapter, and GameObjects
+- `test/` — Node built-in test runner tests
+- `types/` — handwritten package declarations
+- `dist/` — generated bundle and declarations; do not edit by hand
+- `docs/` — architecture, development, dependency, review, and migration documentation
+- `webpack.*.js`, `tsconfig*.json`, `eslint.config.mjs` — build and quality configuration
 
-- maintainable
-- strongly typed
-- easy to extend
-- straightforward to understand
-- compatible with supported modern browsers
-- aligned with current Phaser APIs and lifecycle conventions
+Read the requested task, relevant source/configuration, and linked docs before editing. Check `package.json` for commands. Read [Architecture](docs/architecture.md) for the current package and runtime shape, and [Development](docs/development.md) for workflows.
 
-Changes should improve the framework without introducing unnecessary abstractions or coupling it to a specific game.
+## Tooling and validation
 
----
+Use Node 24.21.0 and npm 12.2.x (`.nvmrc` and `package.json` are authoritative); use npm and keep `package-lock.json` synchronised through npm commands. Do not bypass engine/peer conflicts with force flags or `npm audit fix --force`.
 
-## Technology
+Available checks:
 
-The repository uses:
+- `npm test` — lint, typecheck, and unit tests
+- `npm run lint` / `npm run lint:fix` — ESLint on `src` and `test`
+- `npm run format:check` / `npm run format` — Prettier on `src` and `test`
+- `npm run typecheck` — strict TypeScript check
+- `npm run build` — production UMD bundle followed by declaration emit
+- `npm run dev`, `npm run watch`, `npm start` — development bundle/watch
 
-- Phaser
-- TypeScript
-- npm
+Run relevant checks after edits and the full suite for broad changes. Webpack cleans `dist`; run `npm run build` last when verifying package artifacts. Static checks do not replace browser verification for Phaser rendering or lifecycle behavior.
 
-Additional tooling such as the bundler, test framework, ESLint and formatting configuration should be determined from the repository rather than assumed from this document.
+## Code conventions
 
-`package.json` and the relevant configuration files are the source of truth for versions and commands.
-
----
-
-## Before Making Changes
-
-Before implementing a task:
-
-1. Read the requested task file completely.
-2. Inspect the relevant source and configuration.
-3. Read existing documentation related to the change.
-4. Identify existing conventions before introducing new ones.
-5. Check `package.json` for available scripts.
-6. Search for existing abstractions before creating new ones.
-
-Do not assume the repository follows generic Phaser or TypeScript examples.
-
-Work with the architecture that actually exists.
-
-For substantial changes, understand the affected execution path before editing.
-
----
-
-## Package Management
-
-Use npm.
-
-Do not migrate this repository to:
-
-- Yarn
-- pnpm
-- Bun
-- another package manager
-
-Keep `package-lock.json` committed and synchronised with `package.json`.
-
-Do not manually edit dependency entries in `package-lock.json`.
-
-Use normal npm commands to modify dependencies.
-
-Avoid:
-
-```sh
-npm install --force
-npm install --legacy-peer-deps
-npm audit fix --force
-```
-
-Do not use these commands merely to bypass dependency conflicts.
-
-Investigate and resolve the underlying compatibility issue instead.
-
----
-
-## Dependencies
-
-Before adding a dependency:
-
-1. Determine whether the repository already provides the required functionality.
-2. Consider whether the functionality is simple enough to implement without another package.
-3. Check that the package is maintained.
-4. Check compatibility with the current Node, TypeScript, Phaser and build-tooling versions.
-
-Prefer fewer dependencies.
-
-Do not add packages solely to avoid writing small amounts of straightforward code.
-
-When upgrading dependencies, review breaking changes rather than blindly moving every package to the newest version.
-
----
-
-## TypeScript
-
-Prefer strict, explicit TypeScript.
-
-Avoid:
-
-- `any`
-- unnecessary type assertions
-- `@ts-ignore`
-- `@ts-expect-error` without documented justification
-- non-null assertions where
+- Keep TypeScript strict and explicit. Avoid `any`, unjustified assertions/suppressions, and unnecessary non-null assertions. Use type-only imports when appropriate. `skipLibCheck` currently covers external Phaser declaration diagnostics only; do not hide framework source errors.
+- Follow Phaser scene/GameObject lifecycle. Consider keyboard availability nullable and avoid removing listeners owned by shared Phaser plugins. Do not add a framework game bootstrap, generic state container, or subsystem without concrete consumer need.
+- Preserve public behavior unless the task explicitly changes it. Input teardown/focus, multi-pointer button semantics, resize/scaling contract, browser runtime coverage, and package entrypoint/type parity remain known follow-up areas; read the best-practices review before changing them.
+- Add meaningful `node:test` assertions for pure behavior. Phaser-sensitive changes require a representative host/browser check where available; document gaps rather than claiming unverified behavior.
+- Update the relevant docs when commands, architecture, dependencies, public behavior, or known risks change. Keep documentation specific to this repository and avoid duplicating entire guides.

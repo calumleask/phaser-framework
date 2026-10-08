@@ -2,6 +2,20 @@
 
 Audit date: 7 October 2026. Scope: discovery and planning only.
 
+## Current implementation status
+
+Updated 8 October 2026. The original audit below is retained as a historical baseline; implementation updates record completed work and deviations. Tasks 02–06 are complete: Node/npm, TypeScript and Webpack/Babel tooling were modernised; Phaser moved from 3.55.2 through a 3.90.0 checkpoint to 4.2.1; ESLint/Prettier were modernised; dependency/security review found no unused direct packages and zero reported audit vulnerabilities; and the best-practices review implemented low-risk emitter/logging/test improvements. Task 07 adds the repository-specific [README](../README.md), [architecture](architecture.md), [development](development.md), [dependency](dependencies.md), and [best-practices](best-practices-review.md) guides, and makes this file the migration record.
+
+Current toolchain: Node 24.21.0, npm 12.2.x, TypeScript 5.9.3, Phaser 4.2.1, Webpack 5.111.1, Babel 7.29.7, ESLint 10.12.0, and Prettier 3.9.9. The main deviations from the proposed order were that a permanent host fixture and complete runtime tests were not available before the engine migration, and Phaser 4.2.1's external declarations require `skipLibCheck` under TypeScript 5.9.3. The temporary browser smoke fixture provided limited evidence but was removed; manual consumer verification remains open.
+
+Historical task 02–05 entries below report that `npm test` failed at the then-placeholder `test:unit`. Task 06 replaced that placeholder with `test/EventEmitter.test.mjs`; as of this update `npm test` runs lint, typecheck, and the Node unit test. The earlier command results remain historical and should not be read as the current test status.
+
+Still open: representative browser/consumer checks for rendering, scene lifecycle/restarts, touch/input, resize/DPR/scaling, and package loading; resolving the package `module`/UMD/declaration contract; and deciding whether to improve input teardown, multi-pointer button behavior, scale semantics, and event dispatch mutation behavior. Babel 8, TypeScript 7, ESM output, Phaser peer/externalisation, and CI remain optional future work. See the [best-practices review](best-practices-review.md) for scoped findings and decision points.
+
+## Implementation update: task 07, 8 October 2026
+
+Documentation now describes the actual library boundary, source exports, Phaser 4.2.1 integration, build outputs, Node/npm requirements, available scripts, dependency decisions, and verification limitations. No source or dependency changes were made in this documentation task. Commands were checked against `package.json`; the guides explicitly call out the lack of a game host/assets pipeline and the current package entrypoint/type parity gaps.
+
 ## Recommendation
 
 Retain npm and Webpack 5. Establish meaningful runtime and package-consumer checks on Phaser 3.55.2, modernise the compatible tooling, remove reliance on Phaser globals, and verify a Phaser 3.90.0 checkpoint before moving to **Phaser 4.2.1**. Treat public declaration repairs, input lifecycle fixes, and any scaling correction as separately reviewable changes. Do not combine the engine upgrade with a new bundler or a wholesale public API redesign.
