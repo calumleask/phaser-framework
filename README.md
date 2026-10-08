@@ -4,7 +4,7 @@ A small reusable TypeScript framework for Phaser games. It provides a scene base
 
 ## Stack and prerequisites
 
-- Phaser 4.2.1
+- Phaser 4.2.1 (required peer dependency in consuming games)
 - TypeScript 5.9.3
 - Webpack 5 and Babel 7
 - ESLint 10, Prettier 3, and Node's built-in test runner
@@ -22,7 +22,8 @@ npm ci
 npm run dev           # development UMD bundle
 npm run watch         # rebuild the development bundle on changes
 npm start             # alias for watch
-npm run build         # production bundle followed by declarations
+npm run build         # production UMD and ESM bundles, then declarations
+npm run verify:consumer  # packed-package types and Chrome/Edge WebGL checks
 npm test              # lint, typecheck, and unit tests
 npm run lint          # ESLint on src and test
 npm run format:check  # check formatting on src and test
@@ -31,14 +32,15 @@ npm run typecheck     # strict source/type check without emitting files
 npm run clean         # remove dist
 ```
 
-`npm run build` writes the UMD bundle and generated declarations to `dist/`. Webpack cleans that directory when either build configuration runs, so use the production `build` command last when preparing package artifacts. `npm run dev` builds a library bundle; the repository does not provide a game page or development server.
+`npm run build` writes `dist/phfw.js` (UMD), `dist/phfw.mjs` (ESM), and generated declarations. Phaser is supplied by the host game: load Phaser before the UMD script, then access `phfw.default`; bundlers can use the built ESM entry and a default import. The package pins the verified Phaser peer version to 4.2.1. `npm run verify:consumer` builds, installs a tarball into an isolated fixture, typechecks a consumer, and runs UMD and bundled WebGL checks in Chrome or Edge. Set `PHFW_CHROME_PATH` if the browser is in a nonstandard location.
+
+Webpack cleans `dist/` when the UMD build runs, so use the production `build` command last when preparing package artifacts. `npm run dev` builds a library bundle; it does not start a development server.
 
 ## Repository layout
 
 - `src/` — exported framework source (`Scene`, `Core`, `Input`, and `Objects`)
-- `test/` — Node unit tests
-- `types/` — handwritten package declaration file
-- `dist/` — generated bundle and declarations
+- `test/` — Node unit tests and the packed browser consumer fixture
+- `dist/` — generated UMD/ESM bundles and authoritative declarations
 - `docs/` — architecture, development, dependency, and migration notes
 - `webpack.*.js`, `tsconfig*.json`, `eslint.config.mjs` — build and quality configuration
 

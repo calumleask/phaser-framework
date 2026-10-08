@@ -1,28 +1,28 @@
 {
   "name": "phaser-framework",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "./dist/phfw.js",
-  "module": "./src/index.ts",
+  "module": "./dist/phfw.mjs",
   "files": [
     "dist",
-    "src",
-    "types"
+    "src"
   ],
   "scripts": {
     "clean": "node -e \"const fs=require('node:fs'); const path=require('node:path'); const target=path.resolve('dist'); if(path.dirname(target)!==process.cwd()) throw Error('Unexpected dist path'); fs.rmSync(target,{recursive:true,force:true})\"",
     "test": "npm run lint && npm run typecheck && npm run test:unit",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test:unit": "node --test",
+    "test:unit": "node --test test/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "dev": "webpack --config webpack.dev.js --progress",
     "watch": "webpack --config webpack.dev.js --progress --watch",
     "start": "npm run watch",
-    "build": "webpack --config webpack.prod.js --progress && npm run ts:defs",
+    "build": "webpack --config webpack.prod.js --progress && webpack --config webpack.esm.js --progress && npm run ts:defs",
     "ts:defs": "tsc -p tsconfig.types.json",
     "format": "prettier --write src test",
-    "format:check": "prettier --check src test"
+    "format:check": "prettier --check src test",
+    "verify:consumer": "npm run build && node test/consumer/verify.mjs"
   },
   "author": "Calum Leask",
   "license": "ISC",
@@ -31,9 +31,6 @@
     "node": ">=24.15.0 <25",
     "npm": ">=12.2.0 <13"
   },
-  "dependencies": {
-    "phaser": "4.2.1"
-  },
   "devDependencies": {
     "@babel/core": "7.29.7",
     "@babel/preset-env": "7.29.7",
@@ -41,6 +38,7 @@
     "@eslint/js": "10.0.1",
     "babel-loader": "10.1.1",
     "eslint": "10.12.0",
+    "phaser": "4.2.1",
     "prettier": "3.9.9",
     "terser-webpack-plugin": "5.6.1",
     "typescript": "5.9.3",
@@ -49,5 +47,8 @@
     "webpack-cli": "7.2.3",
     "webpack-merge": "6.0.1"
   },
-  "types": "./types/phfw.d.ts"
+  "types": "./dist/types/index.d.ts",
+  "peerDependencies": {
+    "phaser": "4.2.1"
+  }
 }

@@ -14,14 +14,15 @@ Use npm for dependency changes and commit the synchronised `package-lock.json`. 
 
 - `npm run dev` creates the development UMD bundle in `dist/`.
 - `npm run watch` or `npm start` rebuilds that bundle as files change.
-- `npm run build` creates the production bundle and then emits declarations.
+- `npm run build` creates production UMD and ESM bundles, then emits declarations.
+- `npm run verify:consumer` builds, packs, installs, typechecks, and runs the UMD and bundled consumer fixture in Chrome or Edge. Set `PHFW_CHROME_PATH` if browser discovery fails.
 - `npm test` runs lint, typecheck, then Node unit tests; `npm run test:unit` runs only the unit tests.
 - `npm run lint` checks `src` and `test`; `npm run lint:fix` applies safe ESLint fixes.
 - `npm run format:check` checks `src` and `test`; `npm run format` formats those paths.
 - `npm run typecheck` runs TypeScript without output. `npm run ts:defs` emits declarations.
 - `npm run clean` removes `dist/`.
 
-Webpack cleans `dist` on each build. Run `npm run build` last before inspecting or packing production artifacts. There is no local game host or browser test fixture, so building the framework does not itself demonstrate consumer rendering or lifecycle behavior.
+The UMD Webpack build cleans `dist`; the following ESM build preserves its output. Run `npm run build` last before inspecting or packing production artifacts. `dev` and `watch` compile a UMD library rather than serving a game. The small host under `test/consumer/` is only for packed-package validation.
 
 ## Extending the framework
 
@@ -45,10 +46,10 @@ Check whether the framework or platform already provides the needed behavior, ve
 
 The source uses strict TypeScript (`strict`, exact optional properties, checked indexed access, override checks, isolated modules, and verbatim module syntax). Keep imports explicit, use `import type` for type-only Phaser references, prefer narrow public types, and avoid `any`, suppressions, unnecessary assertions, and non-null assertions. `skipLibCheck` is enabled because of current Phaser declaration incompatibilities, but it skips all declaration-file checking, including this package's declarations; verify public types with a consumer fixture before release.
 
-Use Phaser's actual scene and GameObject lifecycle rather than introducing a parallel game bootstrap, global state container, or service locator. Consider that keyboard availability is nullable. InputManager currently has no per-instance teardown or focus reset, TextButton has one pressed flag across pointers, and scaling has no resize behavior; changes to these behaviors need targeted browser verification and an explicit contract. See [Architecture](architecture.md) and the [best-practices review](best-practices-review.md).
+Use Phaser's actual scene and GameObject lifecycle rather than introducing a parallel game bootstrap, global state container, or service locator. Consider that keyboard availability is nullable. InputManager currently has no per-instance teardown or focus reset, TextButton has one pressed flag across pointers, and scaling has no resize behavior; changes to these behaviors need targeted browser verification and an explicit contract. Keep Phaser as a shared peer: UMD hosts load Phaser before `phfw.js`, and bundler hosts import from `phaser-framework` so they resolve the built ESM entry. See [Architecture](architecture.md) and the [best-practices review](best-practices-review.md).
 
 ## Tests and release checks
 
-Place Node tests in `test/` using the built-in `node:test` runner. Current tests exercise the pure custom event emitter; they do not cover a real Phaser renderer, scene restart, touch, scaling, or package consumer. Add meaningful behavior assertions rather than tests that mirror private implementation. For Phaser-sensitive changes, verify a representative host game in browsers and record unsupported or untested paths.
+Place pure unit tests in `test/` using the built-in `node:test` runner. `test/consumer/` is a persistent release fixture: it installs a tarball in a temporary project, compiles a TypeScript consumer, then exercises UMD and Webpack imports in a Chrome/Edge WebGL host. It checks scene startup/restart, basic keyboard and button input, and a host-owned resize. Its headless runner advances one Phaser frame after queuing restart because Chrome virtual time may not schedule another animation frame. It does not cover touch, other browsers, every visual detail, or the known input/scaling edge cases. Add meaningful behavior assertions rather than tests that mirror private implementation.
 
-Before preparing artifacts, run `npm test`, `npm run format:check`, and `npm run build`; inspect `dist/` after the final build. The current package entrypoints and handwritten type declaration have documented parity gaps, so do not infer release compatibility solely from a successful build. See the [modernisation plan](modernisation-plan.md) for open migration gates.
+Before preparing artifacts, run `npm test`, `npm run format:check`, and `npm run verify:consumer`; inspect `dist/` after the final build. The fixture verifies the packed package's declared entrypoints and generated types. Perform manual browser/game checks for behavior outside that fixture; see the [modernisation review](modernisation-review.md) for remaining risks.

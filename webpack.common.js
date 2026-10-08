@@ -11,8 +11,6 @@ module.exports = {
   output: {
     path: BUILD_DIR,
     filename: '[name].js',
-    library: 'phfw',
-    libraryTarget: 'umd',
     clean: true,
   },
 
