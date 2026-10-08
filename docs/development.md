@@ -24,6 +24,8 @@ Use npm for dependency changes and commit the synchronised `package-lock.json`. 
 
 The production script cleans `dist` once before both Webpack outputs and declaration generation, so stale files cannot survive a successful build. Run `npm run build` last before inspecting or packing production artifacts. `dev` and `watch` compile a UMD library rather than serving a game; they leave any earlier ESM and declaration files on disk, which should not be treated as a fresh production build. The small host under `test/consumer/` is only for packed-package validation.
 
+TypeScript 6.0.3 checks browser source and emits declarations; Babel and Webpack still build JavaScript. The base `tsconfig.json` explicitly keeps ES2022, ESNext modules, Bundler resolution, DOM libraries, no ambient package types, and strict checking. `tsconfig.types.json` pins `rootDir` to `src` because [TypeScript 6 changed its default](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html#rootdir-now-defaults-to-). No deprecated compiler option or `ignoreDeprecations` escape is used. Keep the generated `dist/types/index.d.ts` path when changing compiler settings; the sibling game's copy script requires it.
+
 ## Extending the framework
 
 ### Add a scene

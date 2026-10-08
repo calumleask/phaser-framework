@@ -5,7 +5,7 @@ A small reusable TypeScript framework for Phaser games. It provides a scene base
 ## Stack and prerequisites
 
 - Phaser 4.2.1 (required peer dependency in consuming games)
-- TypeScript 5.9.3
+- TypeScript 6.0.3
 - Webpack 5 and Babel 7
 - ESLint 10, Prettier 3, and Node's built-in test runner
 - Node 24.21.0 and npm 12.2.x (the package requires Node `>=24.15 <25` and npm `>=12.2 <13`)

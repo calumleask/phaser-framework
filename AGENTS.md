@@ -26,7 +26,7 @@ Available checks:
 - `npm run verify:consumer` — packed-package type and Chrome/Edge WebGL checks
 - `npm run dev`, `npm run watch`, `npm start` — development bundle/watch
 
-Run relevant checks after edits and the full suite for broad changes. Run `npm run verify:consumer` for changes to exports, Phaser integration, scene/input behavior, or packaging; it needs Chrome or Edge (`PHFW_CHROME_PATH` overrides discovery). Webpack's UMD build cleans `dist`; run `npm run build` last when verifying package artifacts. The browser fixture covers two consumer modes but does not establish cross-browser or touch behavior.
+Run relevant checks after edits and the full suite for broad changes. Run `npm run verify:consumer` for changes to exports, Phaser integration, scene/input behavior, or packaging; it needs Chrome or Edge (`PHFW_CHROME_PATH` overrides discovery). The production build cleans `dist` before emitting both bundles and declarations; run `npm run build` last when verifying package artifacts. The browser fixture covers two consumer modes but does not establish cross-browser or touch behavior.
 
 ## Code conventions
 

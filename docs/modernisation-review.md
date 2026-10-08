@@ -19,13 +19,13 @@ The Webpack consumer check was necessary: a UMD-only external build still select
 
 The lockfile is npm-owned and includes the Phaser peer plus local development dependency. Babel, `babel-loader`, Webpack/CLI/merge, Terser, TypeScript, ESLint/typescript-eslint, and Prettier all have current source, build, test, or script uses. The new Webpack consumer fixture also uses the existing Webpack dependency. No obsolete direct package, legacy lint configuration, second bundler, redundant cleaning plugin, asset-copy step, or environment convention was found. There is still no development server: `dev` builds UMD and `watch` recompiles it.
 
-`npm outdated` lists only the exact-pinned Babel 7.29.7 trio versus Babel 8.0.7 and TypeScript 5.9.3 versus TypeScript 7.0.2. Babel 8 changes module/target/transform behavior, and TypeScript 7 is outside the installed typescript-eslint peer range. These remain deliberate deferrals. `npm audit` reports zero vulnerabilities; no forced install, override, or audit fix was used.
+At the original review, `npm outdated` listed the exact-pinned Babel 7.29.7 trio versus Babel 8.0.7 and TypeScript 5.9.3 versus TypeScript 7.0.2. Task 10 subsequently moved TypeScript to 6.0.3. Babel 8 changes module/target/transform behavior, and TypeScript 7 remains outside the installed typescript-eslint peer range. The original `npm audit` reported zero vulnerabilities; no forced install, override, or audit fix was used.
 
 ## Build and TypeScript assessment
 
 Webpack 5 remains appropriate for the UMD browser contract and now also emits an ESM entry. The task 09 build follow-up kept Webpack as the dedicated library builder because the sibling game's copy script tracks its configuration and requires the current artifact paths. The production script now cleans `dist` once, builds UMD and ESM, then generates declarations. The UMD bundle is about 17 KiB and the ESM entry about 16 KiB because Phaser is external; the previous Phaser-bundled UMD was about 1.33 MiB. The development output keeps its inline source map; production now emits external maps for both bundles. Terser remains configured for license extraction, but this output has no comments requiring a separate license file. There are no framework assets or static files to copy. Standalone `dev` no longer cleans `dist`, but only refreshes the UMD artifact; run the full production build last when packing.
 
-Source TypeScript remains strict and contains no `any`, suppression comments, or casts introduced to satisfy Phaser 4. Phaser 4.2.1's published declarations still produce TS2526 and TS2416 under TypeScript 5.9.3 with `skipLibCheck: false`. The configured `skipLibCheck: true` skips all declaration-file checking, so the packed consumer fixture compiles actual generated declarations against a TypeScript consumer. It does not prove every conceivable consumer type pattern.
+Source TypeScript remains strict and contains no `any`, suppression comments, or casts introduced to satisfy Phaser 4. Phaser 4.2.1's published declarations still produce TS2526 and TS2416 under TypeScript 6.0.3 with `skipLibCheck: false`. The configured `skipLibCheck: true` skips all declaration-file checking, so the packed consumer fixture compiles actual generated declarations against a TypeScript consumer. It does not prove every conceivable consumer type pattern. The TypeScript 6 follow-up pinned declaration `rootDir` to `src` to preserve the published path.
 
 ## Phaser runtime assessment
 
@@ -34,6 +34,8 @@ The source uses `Phaser.Scene`, `Phaser.GameObjects.Text`, and the scene input/k
 Known behavioral work remains: `InputManager` has no per-instance teardown or held-key reset; `TextButton` has one pressed flag for all pointers; `GameScaleManager` uses uncapped DPR for centers even when distance scaling is capped and does not listen for resize; `Scene.init` assumes host-provided data. The fixture characterizes common paths without changing those contracts. See the [best-practices review](best-practices-review.md) for follow-up decisions.
 
 ## Validation
+
+The task 10 follow-up passed `npm ci`, `npm test`, `npm run format:check`, `npm run build`, and `npm run verify:consumer` with TypeScript 6.0.3. An isolated copy of the sibling game, using its existing TypeScript 5.9.3, passed `npm ci` and `npm test` against the freshly built framework package; its production Webpack build retained three bundle-size warnings, and its Chrome boot check requested all six expected assets. These checks did not edit the game's copied framework files. The table below records the original review commands before task 10.
 
 Checks used Node 24.21.0 and npm 12.2.0. The local temporary toolchain's generated npm shim required a temporary wrapper for nested npm scripts; that was an invocation issue outside the repository.
 
