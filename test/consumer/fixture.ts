@@ -1,4 +1,7 @@
-import framework from 'phaser-framework';
+import framework, {
+  type InputKeyEvent,
+  type InputResetEvent,
+} from 'phaser-framework';
 import type * as Phaser from 'phaser';
 
 const scale = new framework.Core.GameScaleManager(320, 240, 1, 480, 240);
@@ -36,14 +39,36 @@ class ConsumerScene extends framework.Scene {
       input: this.input,
       keys: [{ key: 'A', name: 'action' }],
     });
-    input.on('action', event => {
-      const pressed: unknown = event.pressed;
+    const onAction = (event: InputKeyEvent): void => {
+      const native: KeyboardEvent = event.event;
+      const down: boolean = event.down;
+      const up: boolean = event.up;
+      const pressed: boolean = event.pressed;
+      const released: boolean = event.released;
+      const name: string = event.type;
+      const target: typeof input = event.target;
+      void native;
+      void down;
+      void up;
       void pressed;
-    });
-    input.on('input:reset', event => {
-      const codes: unknown = event.codes;
+      void released;
+      void name;
+      void target;
+    };
+    input.onKey('action', onAction);
+    input.offKey('action', onAction);
+    const onReset = (event: InputResetEvent): void => {
+      const reason: 'blur' = event.reason;
+      const codes: string[] = event.codes;
+      const name: 'input:reset' = event.type;
+      const target: typeof input = event.target;
+      void reason;
       void codes;
-    });
+      void name;
+      void target;
+    };
+    input.onReset(onReset);
+    input.offReset(onReset);
     const pointer: Phaser.Input.Pointer = input.getActivePointer();
     void pointer;
     input.dispose();

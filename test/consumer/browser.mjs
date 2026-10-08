@@ -102,8 +102,33 @@ try {
     await pause(80);
     stage = 'keyboard checks';
     check(scene.keyEvents.length === 2, 'Keyboard events were not delivered');
-    check(scene.keyEvents[0].pressed, 'First keydown was not a press');
-    check(scene.keyEvents[1].released, 'Keyup was not a release');
+    check(
+      scene.keyEvents[0].event instanceof globalThis.KeyboardEvent &&
+        scene.keyEvents[0].event.code === 'KeyA' &&
+        scene.keyEvents[0].type === 'action' &&
+        scene.keyEvents[0].target === scene.inputManager &&
+        scene.keyEvents[0].down === true &&
+        scene.keyEvents[0].up === false &&
+        scene.keyEvents[0].pressed === true &&
+        scene.keyEvents[0].released === false,
+      'Typed keydown payload changed',
+    );
+    check(
+      scene.keyEvents[1].event instanceof globalThis.KeyboardEvent &&
+        scene.keyEvents[1].type === 'action' &&
+        scene.keyEvents[1].target === scene.inputManager &&
+        scene.keyEvents[1].down === false &&
+        scene.keyEvents[1].up === true &&
+        scene.keyEvents[1].pressed === false &&
+        scene.keyEvents[1].released === true,
+      'Typed keyup payload changed',
+    );
+    check(
+      scene.legacyEvents.length === 2,
+      'Inherited on() lost keyboard events',
+    );
+    scene.inputManager.off('action', scene.legacyListener);
+    const legacyCount = scene.legacyEvents.length;
 
     stage = 'manager ownership';
     const keyboard = scene.input.keyboard;
@@ -115,7 +140,9 @@ try {
       keys: [{ key: 'A', name: 'action' }],
     });
     const secondEvents = [];
-    second.on('action', event => secondEvents.push(event));
+    const onSecondKey = event => secondEvents.push(event);
+    second.onKey('action', onSecondKey);
+    second.onKey('action', onSecondKey);
     check(
       keyboard.listenerCount('keydown-A') === 3,
       'Managers did not register separately',
@@ -124,8 +151,13 @@ try {
     await pause(80);
     check(
       secondEvents.length === 1 && secondEvents[0].pressed,
-      'Second manager missed keydown',
+      'Second manager missed keydown or duplicated a typed callback',
     );
+    second.offKey('action', onSecondKey);
+    sendKey('keyup');
+    await pause(80);
+    check(secondEvents.length === 1, 'offKey did not remove its callback');
+    second.onKey('action', onSecondKey);
     const outsideBeforeDispose = outsideCalls;
     second.dispose();
     second.dispose();
@@ -133,18 +165,20 @@ try {
       keyboard.listenerCount('keydown-A') === 2,
       'Disposal removed another keyboard handler',
     );
-    sendKey('keyup');
-    await pause(80);
-    check(secondEvents.length === 1, 'Disposed manager received keyup');
-    check(scene.keyEvents.at(-1).released, 'Live manager lost keyup');
     sendKey('keydown');
+    await pause(80);
+    check(secondEvents.length === 1, 'Disposed manager received keydown');
+    check(scene.keyEvents.at(-1).pressed, 'Live manager lost keydown');
+    check(
+      scene.legacyEvents.length === legacyCount,
+      'Inherited off() did not unsubscribe',
+    );
+    sendKey('keyup');
     await pause(80);
     check(
       outsideCalls > outsideBeforeDispose,
       'Unowned keyboard handler was removed',
     );
-    sendKey('keyup');
-    await pause(80);
     keyboard.off('keydown-A', outsideHandler);
 
     stage = 'focus reset';
@@ -158,10 +192,24 @@ try {
     check(scene.resetEvents.length === 1, 'Focus loss did not notify reset');
     check(scene.resetEvents[0].reason === 'blur', 'Reset reason changed');
     check(
+      scene.resetEvents[0].type === 'input:reset',
+      'Reset event name changed',
+    );
+    check(
+      scene.resetEvents[0].target === scene.inputManager,
+      'Reset target changed',
+    );
+    check(
       scene.resetEvents[0].codes.join(',') === 'KeyA',
       'Reset codes changed',
     );
     check(!('event' in scene.resetEvents[0]), 'Blur invented a keyboard event');
+    scene.inputManager.offReset(scene.resetListener);
+    scene.inputManager.fire('input:reset', { reason: 'blur', codes: [] });
+    check(
+      scene.resetEvents.length === 1,
+      'offReset did not remove its callback',
+    );
     game.events.emit('focus');
     const eventsBeforeRefocus = scene.keyEvents.length;
     sendKey('keydown');
@@ -288,14 +336,16 @@ try {
       };
       this.keyEvents = [];
       this.resetEvents = [];
+      this.legacyEvents = [];
       this.inputManager = new framework.Input.InputManager({
         input: this.input,
         keys: [{ key: 'A', name: 'action' }],
       });
-      this.inputManager.on('action', event => this.keyEvents.push(event));
-      this.inputManager.on('input:reset', event =>
-        this.resetEvents.push(event),
-      );
+      this.inputManager.onKey('action', event => this.keyEvents.push(event));
+      this.legacyListener = event => this.legacyEvents.push(event);
+      this.inputManager.on('action', this.legacyListener);
+      this.resetListener = event => this.resetEvents.push(event);
+      this.inputManager.onReset(this.resetListener);
       if (starts === 1) {
         void exerciseFirstStart(this).catch(finish);
       } else {

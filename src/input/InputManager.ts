@@ -18,6 +18,20 @@ export type InputResetEvent = {
   codes: string[];
 };
 
+export type InputKeyEvent = {
+  type: string;
+  target: InputManager;
+  event: KeyboardEvent;
+  down: boolean;
+  up: boolean;
+  pressed: boolean;
+  released: boolean;
+};
+
+type KeyListener = (event: InputKeyEvent) => void;
+type ResetListener = (event: InputResetEvent) => void;
+type EmitterListener = Parameters<EventEmitter['on']>[1];
+
 export class InputManager extends EventEmitter {
   private _keys: Set<string>;
   private _input: Phaser.Input.InputPlugin;
@@ -27,6 +41,8 @@ export class InputManager extends EventEmitter {
     callback: (event: KeyboardEvent) => void;
   }[];
   private _disposed = false;
+  private _keyListeners = new Map<string, Map<KeyListener, EmitterListener>>();
+  private _resetListeners = new Map<ResetListener, EmitterListener>();
   private _onBlur = (): void => {
     if (this._keys.size === 0) return;
     const codes = [...this._keys];
@@ -84,6 +100,73 @@ export class InputManager extends EventEmitter {
       this._keys.delete(event.code);
     }
     this.fire(keyName, { event, down, up, pressed, released });
+  }
+
+  onKey(name: string, callback: KeyListener): void {
+    let listeners = this._keyListeners.get(name);
+    if (!listeners) {
+      listeners = new Map();
+      this._keyListeners.set(name, listeners);
+    }
+    if (listeners.has(callback)) return;
+    const listener: EmitterListener = payload => {
+      const { event, down, up, pressed, released } = payload;
+      if (
+        !(event instanceof KeyboardEvent) ||
+        typeof down !== 'boolean' ||
+        typeof up !== 'boolean' ||
+        typeof pressed !== 'boolean' ||
+        typeof released !== 'boolean' ||
+        payload.target !== this
+      )
+        return;
+      callback({
+        type: payload.type,
+        target: this,
+        event,
+        down,
+        up,
+        pressed,
+        released,
+      });
+    };
+    listeners.set(callback, listener);
+    super.on(name, listener);
+  }
+
+  offKey(name: string, callback: KeyListener): void {
+    const listeners = this._keyListeners.get(name);
+    if (!listeners) return;
+    const listener = listeners.get(callback);
+    if (!listener) return;
+    super.off(name, listener);
+    listeners.delete(callback);
+    if (listeners.size === 0) this._keyListeners.delete(name);
+  }
+
+  onReset(callback: ResetListener): void {
+    if (this._resetListeners.has(callback)) return;
+    const listener: EmitterListener = payload => {
+      const codes: unknown = payload.codes;
+      if (
+        payload.type !== 'input:reset' ||
+        payload.target !== this ||
+        payload.reason !== 'blur' ||
+        !Array.isArray(codes) ||
+        !codes.every(code => typeof code === 'string')
+      )
+        return;
+      callback({ type: 'input:reset', target: this, reason: 'blur', codes });
+    };
+    this._resetListeners.set(callback, listener);
+    super.on('input:reset', listener);
+  }
+
+  offReset(callback: ResetListener): void {
+    const listener = this._resetListeners.get(callback);
+    if (!listener) return;
+    super.off('input:reset', listener);
+    this._resetListeners.delete(callback);
   }
 
   getActivePointer(): Phaser.Input.Pointer {
