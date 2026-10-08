@@ -20,7 +20,7 @@ The framework itself has no bootstrap, HTML page, `Phaser.Game` construction, or
 
 ## Input
 
-[`InputManager`](../src/input/InputManager.ts) adapts a `Phaser.Input.InputPlugin` and key/name mappings to the framework's [`EventEmitter`](../src/core/EventEmitter.ts). If the scene keyboard plugin exists, it subscribes to matching key-down and key-up events and emits native `KeyboardEvent` payloads with `down`, `up`, `pressed`, and `released` flags. It exposes Phaser's active pointer and can be created with keyboard-disabled input. It does not own or dispose its listeners, restore held-key state on scene restart, or manage browser focus; see the [best-practices review](best-practices-review.md).
+[`InputManager`](../src/input/InputManager.ts) adapts a `Phaser.Input.InputPlugin` and key/name mappings to the framework's [`EventEmitter`](../src/core/EventEmitter.ts). If the scene keyboard plugin exists, it subscribes to matching key-down and key-up events and emits native `KeyboardEvent` payloads with `down`, `up`, `pressed`, and `released` flags. It exposes Phaser's active pointer and can be created with keyboard-disabled input. Each manager owns its keyboard callbacks and disposes them on scene shutdown or explicit `dispose()`. Phaser's game `blur` event clears held codes and emits `input:reset` with `{ reason: 'blur', codes: string[] }` only when codes were held. This notification has no `event: KeyboardEvent`. Consumers create a fresh manager on each scene start; see [Development](development.md) for the lifecycle contract.
 
 ## Events and scaling
 

@@ -40,8 +40,14 @@ class ConsumerScene extends framework.Scene {
       const pressed: unknown = event.pressed;
       void pressed;
     });
+    input.on('input:reset', event => {
+      const codes: unknown = event.codes;
+      void codes;
+    });
     const pointer: Phaser.Input.Pointer = input.getActivePointer();
     void pointer;
+    input.dispose();
+    input.dispose();
     this.context?.scaling.gameUnitToPixel(1);
   }
 }

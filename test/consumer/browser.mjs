@@ -40,6 +40,8 @@ try {
   let starts = 0;
   let shutdowns = 0;
   let selections = 0;
+  let previousManager;
+  let previousEvents;
   const scale = new framework.Core.GameScaleManager(320, 240, 1, 480, 240);
 
   const pause = ms =>
@@ -57,6 +59,7 @@ try {
         bubbles: true,
       }),
     );
+    game.step(globalThis.performance.now(), 16);
   }
 
   function sendMouse(type, button) {
@@ -102,6 +105,94 @@ try {
     check(scene.keyEvents[0].pressed, 'First keydown was not a press');
     check(scene.keyEvents[1].released, 'Keyup was not a release');
 
+    stage = 'manager ownership';
+    const keyboard = scene.input.keyboard;
+    let outsideCalls = 0;
+    const outsideHandler = () => outsideCalls++;
+    keyboard.on('keydown-A', outsideHandler);
+    const second = new framework.Input.InputManager({
+      input: scene.input,
+      keys: [{ key: 'A', name: 'action' }],
+    });
+    const secondEvents = [];
+    second.on('action', event => secondEvents.push(event));
+    check(
+      keyboard.listenerCount('keydown-A') === 3,
+      'Managers did not register separately',
+    );
+    sendKey('keydown');
+    await pause(80);
+    check(
+      secondEvents.length === 1 && secondEvents[0].pressed,
+      'Second manager missed keydown',
+    );
+    const outsideBeforeDispose = outsideCalls;
+    second.dispose();
+    second.dispose();
+    check(
+      keyboard.listenerCount('keydown-A') === 2,
+      'Disposal removed another keyboard handler',
+    );
+    sendKey('keyup');
+    await pause(80);
+    check(secondEvents.length === 1, 'Disposed manager received keyup');
+    check(scene.keyEvents.at(-1).released, 'Live manager lost keyup');
+    sendKey('keydown');
+    await pause(80);
+    check(
+      outsideCalls > outsideBeforeDispose,
+      'Unowned keyboard handler was removed',
+    );
+    sendKey('keyup');
+    await pause(80);
+    keyboard.off('keydown-A', outsideHandler);
+
+    stage = 'focus reset';
+    sendKey('keydown');
+    await pause(80);
+    sendKey('keydown');
+    await pause(80);
+    check(scene.keyEvents.at(-2).pressed, 'Fresh keydown was not pressed');
+    check(!scene.keyEvents.at(-1).pressed, 'Repeated keydown was pressed');
+    game.events.emit('blur');
+    check(scene.resetEvents.length === 1, 'Focus loss did not notify reset');
+    check(scene.resetEvents[0].reason === 'blur', 'Reset reason changed');
+    check(
+      scene.resetEvents[0].codes.join(',') === 'KeyA',
+      'Reset codes changed',
+    );
+    check(!('event' in scene.resetEvents[0]), 'Blur invented a keyboard event');
+    game.events.emit('focus');
+    const eventsBeforeRefocus = scene.keyEvents.length;
+    sendKey('keydown');
+    await pause(80);
+    check(
+      scene.keyEvents.length === eventsBeforeRefocus + 1 &&
+        scene.keyEvents.at(-1).pressed,
+      `Focus loss left stale held key: before=${eventsBeforeRefocus}, after=${scene.keyEvents.length}, pressed=${scene.keyEvents.at(-1).pressed}`,
+    );
+    sendKey('keyup');
+    await pause(80);
+    check(
+      scene.keyEvents.at(-1).released,
+      'Keyup after focus reset was not released',
+    );
+
+    stage = 'keyboard unavailable';
+    const pointerOnly = new framework.Input.InputManager({
+      input: {
+        scene,
+        keyboard: null,
+        activePointer: scene.input.activePointer,
+      },
+      keys: [{ key: 'A', name: 'action' }],
+    });
+    check(
+      pointerOnly.getActivePointer() === scene.input.activePointer,
+      'Pointer-only manager failed',
+    );
+    pointerOnly.dispose();
+
     stage = 'pointer move';
     sendMouse('mousemove', scene.button);
     await pause(80);
@@ -115,6 +206,10 @@ try {
     check(selections === 1, 'Pointer click did not select TextButton once');
 
     stage = 'restart requested';
+    sendKey('keydown');
+    await pause(80);
+    previousManager = scene.inputManager;
+    previousEvents = scene.keyEvents;
     scene.scene.restart({ scaling: scale });
     // Headless virtual time may not schedule another animation frame.
     game.step(globalThis.performance.now(), 16);
@@ -132,6 +227,21 @@ try {
     check(
       scene.input.keyboard.listenerCount('keydown-A') === 1,
       'Keyboard listener duplicated after restart',
+    );
+    const oldEventCount = previousEvents.length;
+    previousManager.onKeyDown(
+      new globalThis.KeyboardEvent('keydown', { code: 'KeyA' }),
+      'action',
+    );
+    check(
+      previousEvents.length === oldEventCount,
+      'Shutdown manager still emitted events',
+    );
+    sendKey('keydown');
+    await pause(80);
+    check(
+      scene.keyEvents.length === 1 && scene.keyEvents[0].pressed,
+      'Restart left stale held key',
     );
 
     stage = 'resize requested';
@@ -177,11 +287,15 @@ try {
         selections++;
       };
       this.keyEvents = [];
+      this.resetEvents = [];
       this.inputManager = new framework.Input.InputManager({
         input: this.input,
         keys: [{ key: 'A', name: 'action' }],
       });
       this.inputManager.on('action', event => this.keyEvents.push(event));
+      this.inputManager.on('input:reset', event =>
+        this.resetEvents.push(event),
+      );
       if (starts === 1) {
         void exerciseFirstStart(this).catch(finish);
       } else {
