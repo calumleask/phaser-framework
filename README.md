@@ -42,4 +42,4 @@ npm run clean         # remove dist
 - `docs/` — architecture, development, dependency, and migration notes
 - `webpack.*.js`, `tsconfig*.json`, `eslint.config.mjs` — build and quality configuration
 
-See [Architecture](docs/architecture.md) for the actual runtime and package shape, [Development](docs/development.md) for contribution workflows, and [Dependencies](docs/dependencies.md) for dependency rationale and upgrade constraints. The [best-practices review](docs/best-practices-review.md) records known follow-up risks; the [modernisation plan](docs/modernisation-plan.md) records migration decisions and remaining verification.
+See [Architecture](docs/architecture.md) for the actual runtime and package shape, [Development](docs/development.md) for contribution workflows, and [Dependencies](docs/dependencies.md) for dependency rationale and upgrade constraints. The [final modernisation review](docs/modernisation-review.md) reports current validation and release gates; the [best-practices review](docs/best-practices-review.md) and [modernisation plan](docs/modernisation-plan.md) retain the detailed findings and migration history.

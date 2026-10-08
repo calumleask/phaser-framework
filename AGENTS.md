@@ -30,7 +30,7 @@ Run relevant checks after edits and the full suite for broad changes. Webpack cl
 
 ## Code conventions
 
-- Keep TypeScript strict and explicit. Avoid `any`, unjustified assertions/suppressions, and unnecessary non-null assertions. Use type-only imports when appropriate. `skipLibCheck` currently covers external Phaser declaration diagnostics only; do not hide framework source errors.
+- Keep TypeScript strict and explicit. Avoid `any`, unjustified assertions/suppressions, and unnecessary non-null assertions. Use type-only imports when appropriate. `skipLibCheck` is enabled because of Phaser 4.2.1 declaration diagnostics, but it skips checking all declaration files, including this package's handwritten declarations. Do not rely on it to validate the public type contract.
 - Follow Phaser scene/GameObject lifecycle. Consider keyboard availability nullable and avoid removing listeners owned by shared Phaser plugins. Do not add a framework game bootstrap, generic state container, or subsystem without concrete consumer need.
 - Preserve public behavior unless the task explicitly changes it. Input teardown/focus, multi-pointer button semantics, resize/scaling contract, browser runtime coverage, and package entrypoint/type parity remain known follow-up areas; read the best-practices review before changing them.
 - Add meaningful `node:test` assertions for pure behavior. Phaser-sensitive changes require a representative host/browser check where available; document gaps rather than claiming unverified behavior.

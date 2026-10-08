@@ -9,12 +9,6 @@ export default defineConfig(
   {
     files: ['src/**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended],
-    languageOptions: {
-      globals: {
-        console: 'readonly',
-        devicePixelRatio: 'readonly',
-      },
-    },
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'error',

@@ -43,7 +43,7 @@ Check whether the framework or platform already provides the needed behavior, ve
 
 ## TypeScript and Phaser conventions
 
-The source uses strict TypeScript (`strict`, exact optional properties, checked indexed access, override checks, isolated modules, and verbatim module syntax). Keep imports explicit, use `import type` for type-only Phaser references, prefer narrow public types, and avoid `any`, suppressions, unnecessary assertions, and non-null assertions. `skipLibCheck` is scoped to the current external Phaser declaration incompatibilities; do not use it to hide framework source errors.
+The source uses strict TypeScript (`strict`, exact optional properties, checked indexed access, override checks, isolated modules, and verbatim module syntax). Keep imports explicit, use `import type` for type-only Phaser references, prefer narrow public types, and avoid `any`, suppressions, unnecessary assertions, and non-null assertions. `skipLibCheck` is enabled because of current Phaser declaration incompatibilities, but it skips all declaration-file checking, including this package's declarations; verify public types with a consumer fixture before release.
 
 Use Phaser's actual scene and GameObject lifecycle rather than introducing a parallel game bootstrap, global state container, or service locator. Consider that keyboard availability is nullable. InputManager currently has no per-instance teardown or focus reset, TextButton has one pressed flag across pointers, and scaling has no resize behavior; changes to these behaviors need targeted browser verification and an explicit contract. See [Architecture](architecture.md) and the [best-practices review](best-practices-review.md).
 
