@@ -42,23 +42,20 @@ export class TextButton extends Phaser.GameObjects.Text {
   }
 
   onPointerOver(): void {
-    console.log('pointerover');
+    // Extension point for hover behavior.
   }
 
   onPointerOut(): void {
-    console.log('pointerout');
     if (this._isDown) {
       this.setUp();
     }
   }
 
   onPointerDown(): void {
-    console.log('pointerdown');
     this.setDown();
   }
 
   onPointerUp(): void {
-    console.log('pointerup');
     if (this._isDown) {
       this.setUp();
       this.select();
@@ -76,7 +73,6 @@ export class TextButton extends Phaser.GameObjects.Text {
   }
 
   select(): void {
-    console.log('select');
     if (this.onSelect) {
       this.onSelect();
     }

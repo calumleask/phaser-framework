@@ -10,6 +10,10 @@ Phaser 4.2.1 is the current stable release, confirmed by both the [official stab
 
 The original audit and proposed sequence below are retained for context. The implementation updates record which checkpoints have since been completed. Recheck registry metadata, peer ranges, security advisories, and release notes before future dependency changes.
 
+## Implementation update: task 06, 8 October 2026
+
+The [framework best-practices review](best-practices-review.md) covers the resulting Phaser 4 source and separates implemented low-risk changes from larger lifecycle, scaling, input, and package-contract decisions. The custom `EventEmitter` now handles prototype-named events, unconditional button/scaling debug logs were removed, and a dependency-free Node test replaced the failing `test:unit` placeholder. The existing build and dependency set remain intact. Browser lifecycle and visual gates remain open until a representative consumer fixture is available.
+
 ## Implementation update: task 05, 8 October 2026
 
 The dependency cleanup found **no unused direct package and no reported security advisory** in the current lockfile. No package was upgraded, replaced, or removed during this task. The npm-owned lockfile and build configuration remain unchanged; making an unneeded dependency change would add migration risk without resolving a finding.

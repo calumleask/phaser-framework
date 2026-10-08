@@ -23,4 +23,8 @@ export default defineConfig(
       '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
     },
   },
+  {
+    files: ['test/**/*.mjs'],
+    extends: [js.configs.recommended],
+  },
 );

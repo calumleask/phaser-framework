@@ -9,20 +9,18 @@ type EventCallback = (
   },
 ) => void;
 
-type EventsObject = { [type: string]: EventCallback[] };
-
 export class EventEmitter {
-  private _events: EventsObject;
+  private _events: Map<string, EventCallback[]>;
 
   constructor() {
-    this._events = {};
+    this._events = new Map();
   }
 
   on(type: string, callback: EventCallback): void {
-    let listeners = this._events[type];
+    let listeners = this._events.get(type);
     if (!listeners) {
       listeners = [];
-      this._events[type] = listeners;
+      this._events.set(type, listeners);
     }
     for (let i = 0; i < listeners.length; ++i) {
       if (listeners[i] === callback) return;
@@ -31,18 +29,21 @@ export class EventEmitter {
   }
 
   off(type: string, callback: EventCallback): void {
-    const listeners = this._events[type];
+    const listeners = this._events.get(type);
     if (!listeners) return;
     for (let i: number = listeners.length - 1; i >= 0; --i) {
       if (listeners[i] === callback) {
         listeners.splice(i, 1);
+        if (listeners.length === 0) {
+          this._events.delete(type);
+        }
         return;
       }
     }
   }
 
   fire(type: string, data: Data): void {
-    const listeners = this._events[type];
+    const listeners = this._events.get(type);
     if (!listeners) return;
     listeners.forEach(callback => {
       callback({

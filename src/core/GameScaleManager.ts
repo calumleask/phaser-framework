@@ -1,8 +1,5 @@
 export class GameScaleManager {
   readonly assetScaleRatio: number;
-  private readonly _viewPortWidth: number;
-  private readonly _viewPortHeight: number;
-  private readonly _aspectRatio: number;
   private readonly _gameUnitToViewPort: number;
   private readonly _viewPortToPixel: number;
   private readonly _pixelCentreX: number;
@@ -15,14 +12,7 @@ export class GameScaleManager {
     maxTargetPixelsNarrowest: number,
     gameUnitsNarrowest: number,
   ) {
-    this._viewPortWidth = viewPortWidth;
-    this._viewPortHeight = viewPortHeight;
-    this._aspectRatio = this._viewPortWidth / this._viewPortHeight;
-
-    const viewPortNarrowest = Math.min(
-      this._viewPortWidth,
-      this._viewPortHeight,
-    );
+    const viewPortNarrowest = Math.min(viewPortWidth, viewPortHeight);
     const screenPixelsNarrowest = devicePixelRatio * viewPortNarrowest;
     this.assetScaleRatio =
       Math.min(screenPixelsNarrowest, maxTargetPixelsNarrowest) /
@@ -35,14 +25,6 @@ export class GameScaleManager {
 
     this._pixelCentreX = (devicePixelRatio * viewPortWidth) / 2;
     this._pixelCentreY = (devicePixelRatio * viewPortHeight) / 2;
-
-    console.log('viewPortWidth: ', this._viewPortWidth);
-    console.log('viewPortHeight: ', this._viewPortHeight);
-    console.log('aspectRatio: ', this._aspectRatio);
-    console.log('devicePixelRatio: ', devicePixelRatio);
-    console.log('assetScaleRatio: ', this.assetScaleRatio);
-    console.log('gameUnitToViewPort: ', this._gameUnitToViewPort);
-    console.log('viewPortToPixel: ', this._viewPortToPixel);
   }
 
   getAssetScaleRatio(): number {
