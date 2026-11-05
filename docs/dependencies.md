@@ -6,7 +6,7 @@ Versions below reflect `package.json` after the framework modernisation recorded
 
 | Package | Version | Why it is present | Upgrade notes |
 | --- | --- | --- | --- |
-| `phaser` | 4.2.1 | Required peer supplied by the consuming game, and a development dependency for local builds and checks. Both bundles externalise it so the host and framework use the same scene/GameObject classes. | The migration from 3.55.2 to 4.2.1 required explicit runtime imports and nullable keyboard handling. Only this exact Phaser version is verified; do not widen the peer range without consumer checks. |
+| `phaser` | 4.2.1 | Required peer supplied by the application, and a development dependency for local builds and checks. Both bundles externalise it so the application and framework use the same scene/GameObject classes. | The migration from 3.55.2 to 4.2.1 required explicit runtime imports and nullable keyboard handling. Only this exact Phaser version is verified; do not widen the peer range without consumer checks. |
 
 ## Development dependencies
 

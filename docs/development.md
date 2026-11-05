@@ -24,7 +24,7 @@ Use npm for dependency changes and commit the synchronised `package-lock.json`. 
 
 The production script cleans `dist` once before both Webpack outputs and declaration generation, so stale files cannot survive a successful build. Run `npm run build` last before inspecting or packing production artifacts. `dev` and `watch` compile a UMD library rather than serving a game; they leave any earlier ESM and declaration files on disk, which should not be treated as a fresh production build. The small host under `test/consumer/` is only for packed-package validation.
 
-TypeScript 6.0.3 checks browser source and emits declarations; Babel and Webpack still build JavaScript. The base `tsconfig.json` explicitly keeps ES2022, ESNext modules, Bundler resolution, DOM libraries, no ambient package types, and strict checking. `tsconfig.types.json` pins `rootDir` to `src` because [TypeScript 6 changed its default](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html#rootdir-now-defaults-to-). No deprecated compiler option or `ignoreDeprecations` escape is used. Keep the generated `dist/types/index.d.ts` path when changing compiler settings; the sibling game's copy script requires it.
+TypeScript 6.0.3 checks browser source and emits declarations; Babel and Webpack still build JavaScript. The base `tsconfig.json` explicitly keeps ES2022, ESNext modules, Bundler resolution, DOM libraries, no ambient package types, and strict checking. `tsconfig.types.json` pins `rootDir` to `src` because [TypeScript 6 changed its default](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html#rootdir-now-defaults-to-). No deprecated compiler option or `ignoreDeprecations` escape is used. Keep the generated `dist/types/index.d.ts` path aligned with the `types` entry in `package.json`.
 
 ## Extending the framework
 
@@ -38,7 +38,7 @@ Use Phaser GameObjects and lifecycle directly. For a custom object based on an e
 
 ### Add assets
 
-Assets belong to the consuming game. This repository has no assets, loader wrapper, URL convention, or asset-copy stage. Load assets from the host scene using Phaser's loader and have the host build/package those files. Do not add assumptions about a game's directory or deployment base path to the framework.
+This package has no assets, loader wrapper, URL convention, or asset-copy stage. Applications load and package their own assets through Phaser. Do not add assumptions about an application's directory or deployment base path to the framework.
 
 ### Add a dependency
 
@@ -54,7 +54,7 @@ Use Phaser's actual scene and GameObject lifecycle rather than introducing a par
 
 Create an `InputManager` during each scene start (for example, in `create()`), regardless of whether the scene extends the framework `Scene`. The manager automatically calls `dispose()` on that scene's shutdown. Call `dispose()` earlier when replacing a manager during a live scene. It is safe to call repeatedly. Disposal removes only that manager's keyboard callbacks and game-blur/scene-shutdown subscriptions, and clears held codes. It does not emit key releases or a reset event. Its named keyboard dispatch is inert after disposal, including direct calls to `onKeyDown` and `onKeyUp`; `getActivePointer()` remains available while the supplied input plugin remains valid. A disposed manager cannot be restarted or reattached. Phaser also clears keyboard-plugin listeners on scene shutdown, so retaining the old manager across restart would leave it without subscriptions.
 
-Named key events keep their native `KeyboardEvent` and `down`, `up`, `pressed`, `released` flags. The first keydown for a code has `pressed: true`; subsequent keydowns before keyup have `pressed: false`. When Phaser reports browser focus loss through its game `blur` event, the manager clears any held codes and emits `input:reset` once with `{ reason: 'blur', codes: string[] }` if at least one code was held. The `codes` array contains the cancelled `KeyboardEvent.code` values; `input:reset` is reserved and should not be used as a configured key name. It has no `event` property or synthetic keyup. A consuming game can clear its own movement or action state on this event. Keyboard-disabled input still provides pointer access and supports disposal; it does not register keyboard callbacks.
+Named key events keep their native `KeyboardEvent` and `down`, `up`, `pressed`, `released` flags. The first keydown for a code has `pressed: true`; subsequent keydowns before keyup have `pressed: false`. When Phaser reports browser focus loss through its game `blur` event, the manager clears any held codes and emits `input:reset` once with `{ reason: 'blur', codes: string[] }` if at least one code was held. The `codes` array contains the cancelled `KeyboardEvent.code` values; `input:reset` is reserved and should not be used as a configured key name. It has no `event` property or synthetic keyup. Applications can clear their own movement or action state on this event. Keyboard-disabled input still provides pointer access and supports disposal; it does not register keyboard callbacks.
 
 ### Typed input events
 

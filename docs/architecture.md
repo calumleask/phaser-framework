@@ -2,9 +2,13 @@
 
 ## Role and entry point
 
-This repository builds a reusable Phaser library, not a complete game. A consuming application creates `Phaser.Game`, configures the renderer and scale manager, registers scenes, and owns startup. The source entry is [`src/index.ts`](../src/index.ts), which default-exports an object with `Core`, `Input`, `Objects`, and `Scene` namespaces. Core, input, and object modules expose their current classes through their `index.ts` files.
+This repository builds a reusable Phaser library, not a complete game. A consuming application creates `Phaser.Game`, configures the renderer and scale manager, registers scenes, and owns startup. The source entry is [`src/index.ts`](../src/index.ts), which default-exports an object with `Audio`, `Core`, `Input`, `Objects`, and `Scene` namespaces. Core, input, and object modules expose their current classes through their `index.ts` files.
 
 The package advertises `dist/phfw.js` as `main`, built `dist/phfw.mjs` as `module`, and generated `dist/types/index.d.ts` as `types`. Webpack produces a UMD library named `phfw`; its browser API is under `phfw.default` to preserve the existing default-export shape. Bundlers select the ESM build, where `import framework from 'phaser-framework'` yields the API object. An isolated packed-package fixture verifies both paths and the generated public types. There is no handwritten declaration or raw-TypeScript module entry.
+
+## Audio
+
+The additive `Audio` namespace exports `MusicTransport`, `MusicLayerMixer`, `TICKS_PER_QUARTER` (24), and `ticksPerBar`. Public configuration and scheduling types are exported from the package root. The foundation imports no game content and chooses no browser timer. Hosts inject a clock/timer, decoded sample-aligned loops, and explicit per-layer default boundaries. The mixer owns its transport, sources, gains and context-state subscription, while the host retains its AudioContext and destination. See [Music usage and ownership](audio.md) for the contract and a synthetic example.
 
 ## Phaser integration and configuration
 
@@ -16,7 +20,7 @@ The framework itself has no bootstrap, HTML page, `Phaser.Game` construction, or
 
 ## GameObjects and assets
 
-[`TextButton`](../src/objects/TextButton.ts) extends Phaser's Text GameObject, establishes interactivity, tracks a single pressed state, changes text color, and calls the optional `onSelect` callback on its pointer-up path. Consumers must add it to the display list, typically with `scene.add.existing(button)`. Pointer-out cancels the pressed visual state. There is no asset directory, loader abstraction, asset manifest, or asset-copy build step; consuming games load their own assets through Phaser.
+[`TextButton`](../src/objects/TextButton.ts) extends Phaser's Text GameObject, establishes interactivity, tracks a single pressed state, changes text color, and calls the optional `onSelect` callback on its pointer-up path. Applications must add it to the display list, typically with `scene.add.existing(button)`. Pointer-out cancels the pressed visual state. There is no asset directory, loader abstraction, asset manifest, or asset-copy build step; applications load their own assets through Phaser.
 
 ## Input
 
@@ -32,6 +36,6 @@ This framework has no physics integration or state system beyond scene context a
 
 ## Build and execution
 
-Webpack remains the dedicated library builder. The sibling game's copy script checks the framework's Webpack configuration files for freshness, requires the three advertised output paths, and its Webpack build aliases `phaser-framework` directly to `dist/phfw.mjs`. Keeping this builder and those paths avoids a game-owned copy-script migration. There are no framework asset loaders, aliases, or static assets to migrate. A later Vite library-mode experiment would need a coordinated game copy-script change and proof that the UMD `phfw.default` and ESM default-import contracts survive.
+Webpack is the library builder. Its production configuration emits the UMD, ESM, and declaration paths listed above; Phaser is external in both JavaScript bundles so the application and framework share the same Phaser instance. There are no framework asset loaders or static assets. Any future build-system change must preserve the documented package entry points, default-export shape, external Phaser peer, and generated declarations.
 
 Webpack's common configuration uses `src/index.ts` and Babel TypeScript/modern-JavaScript transforms. Development emits a UMD bundle with an inline source map. `npm run build` cleans `dist` once, then emits the production UMD and ESM bundles with external source maps, then generates declarations under `dist/types`. Terser is configured to extract license comments if any are present; the current external-Phaser output emits no separate license text file. Phaser stays external in both bundles. Standalone `dev` and `watch` builds do not clean `dist` and only refresh the UMD file, so run `npm run build` last for packaging. Strict TypeScript 6.0.3 checks framework source; the declaration config explicitly sets `rootDir` to `src` to preserve `dist/types/index.d.ts` under TypeScript 6's changed default. `skipLibCheck` remains enabled because Phaser 4.2.1 has declaration errors under TypeScript 6.0.3; it also skips checking generated declarations, so the packed consumer typecheck provides an additional public-contract gate.

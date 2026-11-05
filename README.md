@@ -1,10 +1,10 @@
 # Phaser Framework
 
-A small reusable TypeScript framework for Phaser games. It provides a scene base class, a text button, an input adapter, a lightweight event emitter, and viewport/game-unit scaling helpers. The consuming game owns `Phaser.Game`, its configuration, scenes, assets, and any physics, audio, animation, or tween systems.
+A small reusable TypeScript framework for Phaser games. It provides a scene base class, a text button, an input adapter, a lightweight event emitter, viewport/game-unit scaling helpers, and a Web Audio music transport and loop mixer. Applications own `Phaser.Game`, its configuration, scenes, assets, and optional systems such as physics and audio.
 
 ## Stack and prerequisites
 
-- Phaser 4.2.1 (required peer dependency in consuming games)
+- Phaser 4.2.1 (required peer dependency)
 - TypeScript 6.0.3
 - Webpack 5 and Babel 7
 - ESLint 10, Prettier 3, and Node's built-in test runner
@@ -32,9 +32,9 @@ npm run typecheck     # strict source/type check without emitting files
 npm run clean         # remove dist
 ```
 
-`npm run build` writes `dist/phfw.js` (UMD), `dist/phfw.mjs` (ESM), and generated declarations. Phaser is supplied by the host game: load Phaser before the UMD script, then access `phfw.default`; bundlers can use the built ESM entry and a default import. The package pins the verified Phaser peer version to 4.2.1. `npm run verify:consumer` builds, installs a tarball into an isolated fixture, typechecks a consumer, and runs UMD and bundled WebGL checks in Chrome or Edge. Set `PHFW_CHROME_PATH` if the browser is in a nonstandard location.
+`npm run build` writes `dist/phfw.js` (UMD), `dist/phfw.mjs` (ESM), and generated declarations. The application supplies Phaser: load it before the UMD script, then access `phfw.default`; bundlers can use the built ESM entry and a default import. The package pins the verified Phaser peer version to 4.2.1. `npm run verify:consumer` builds, installs a tarball into an isolated fixture, typechecks a consumer, and runs UMD and bundled WebGL checks in Chrome or Edge. Set `PHFW_CHROME_PATH` if the browser is in a nonstandard location.
 
-The production build cleans `dist/` once, then emits both JavaScript bundles, external source maps, and declarations. Run it last when preparing package artifacts; `dev` and `watch` only update the UMD bundle and do not clean old production files. `npm run dev` builds a library bundle; it does not start a development server. See [Architecture](docs/architecture.md#build-and-execution) for the builder decision and the sibling game's copy contract.
+The production build cleans `dist/` once, then emits both JavaScript bundles, external source maps, and declarations. Run it last when preparing package artifacts; `dev` and `watch` only update the UMD bundle and do not clean old production files. `npm run dev` builds a library bundle; it does not start a development server. See [Architecture](docs/architecture.md#build-and-execution) for the package entry points and build outputs.
 
 ## Repository layout
 

@@ -37,6 +37,86 @@ try {
     'Framework and host must use the same Phaser.Scene class',
   );
 
+  stage = 'packed audio API';
+  const { Audio } = framework;
+  const meter = { numerator: 4, denominator: 4 };
+  check(
+    Audio.TICKS_PER_QUARTER === 24 && Audio.ticksPerBar(meter) === 96,
+    'Packed audio timing exports changed',
+  );
+  const callbacks = new Map();
+  let nextTimer = 0;
+  const timer = {
+    set(callback) {
+      callbacks.set(++nextTimer, callback);
+      return nextTimer;
+    },
+    clear(handle) {
+      callbacks.delete(handle);
+    },
+  };
+  const clock = { currentTime: 0, state: 'running' };
+  const transport = new Audio.MusicTransport({
+    clock,
+    timer,
+    bpm: 120,
+    meter,
+    phraseBars: 4,
+  });
+  const times = [];
+  let cleaned = 0;
+  const scheduled = transport.scheduleAtTick(1, atTime => {
+    times.push(atTime);
+    return () => cleaned++;
+  });
+  transport.start();
+  check(
+    times.length === 1 && times[0] === 1 / 48,
+    'Packed transport timestamp changed',
+  );
+  check(
+    transport.getNextBarTick() === 96 && transport.getNextPhraseTick() === 384,
+    'Packed transport boundary changed',
+  );
+  scheduled.cancel();
+  scheduled.cancel();
+  transport.dispose();
+  transport.dispose();
+  check(cleaned === 1 && callbacks.size === 0, 'Packed transport leaked work');
+
+  // A real offline graph exercises package Web Audio construction/disposal without unlock.
+  // Audible start/resume remains a host listening check.
+  const context = new globalThis.OfflineAudioContext(1, 96000, 48000);
+  const loop = context.createBuffer(1, 96000, 48000);
+  const mixerTransport = new Audio.MusicTransport({
+    clock: context,
+    timer,
+    bpm: 120,
+    meter,
+    phraseBars: 4,
+  });
+  const mixer = new Audio.MusicLayerMixer({
+    context,
+    destination: context.destination,
+    transport: mixerTransport,
+    loopTicks: 96,
+    layers: [{ id: 'synthetic', buffer: loop, defaultBoundary: 'bar' }],
+  });
+  mixer.setStemGain('synthetic', 0.5);
+  mixer.setMasterVolume(0.4);
+  mixer.setMuted(true);
+  check(mixer.start() === false, 'Suspended packed mixer should defer startup');
+  mixer.dispose();
+  mixer.dispose();
+  check(
+    mixerTransport.state === 'disposed' && callbacks.size === 0,
+    'Packed mixer did not dispose its transport',
+  );
+  check(
+    context.state === 'suspended',
+    'Packed mixer changed host context ownership',
+  );
+
   let starts = 0;
   let shutdowns = 0;
   let selections = 0;
