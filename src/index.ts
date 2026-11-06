@@ -1,4 +1,5 @@
 import * as Audio from './audio';
+import * as Dialogue from './dialogue';
 import * as Core from './core';
 import * as Input from './input';
 import * as Objects from './objects';
@@ -18,8 +19,19 @@ export type {
   LayerChange,
 } from './audio';
 
+export type {
+  ScheduledLine,
+  SchedulerOptions,
+  DialoguePriority,
+  DialogueTrigger,
+  PendingDialogue,
+  DialogueDirectorState,
+  DialogueTransition,
+} from './dialogue';
+
 const phfw = {
   Audio,
+  Dialogue,
   Core,
   Input,
   Objects,

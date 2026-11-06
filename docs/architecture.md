@@ -2,13 +2,17 @@
 
 ## Role and entry point
 
-This repository builds a reusable Phaser library, not a complete game. A consuming application creates `Phaser.Game`, configures the renderer and scale manager, registers scenes, and owns startup. The source entry is [`src/index.ts`](../src/index.ts), which default-exports an object with `Audio`, `Core`, `Input`, `Objects`, and `Scene` namespaces. Core, input, and object modules expose their current classes through their `index.ts` files.
+This repository builds a reusable Phaser library, not a complete game. A consuming application creates `Phaser.Game`, configures the renderer and scale manager, registers scenes, and owns startup. The source entry is [`src/index.ts`](../src/index.ts), which default-exports an object with `Audio`, `Dialogue`, `Core`, `Input`, `Objects`, and `Scene` namespaces. Core, input, and object modules expose their current classes through their `index.ts` files.
 
 The package advertises `dist/phfw.js` as `main`, built `dist/phfw.mjs` as `module`, and generated `dist/types/index.d.ts` as `types`. Webpack produces a UMD library named `phfw`; its browser API is under `phfw.default` to preserve the existing default-export shape. Bundlers select the ESM build, where `import framework from 'phaser-framework'` yields the API object. An isolated packed-package fixture verifies both paths and the generated public types. There is no handwritten declaration or raw-TypeScript module entry.
 
 ## Audio
 
 The additive `Audio` namespace exports `MusicTransport`, `MusicLayerMixer`, `TICKS_PER_QUARTER` (24), and `ticksPerBar`. Public configuration and scheduling types are exported from the package root. The foundation imports no game content and chooses no browser timer. Hosts inject a clock/timer, decoded sample-aligned loops, and explicit per-layer default boundaries. The mixer owns its transport, sources, gains and context-state subscription, while the host retains its AudioContext and destination. See [Music usage and ownership](audio.md) for the contract and a synthetic example.
+
+## Dialogue
+
+The additive `Dialogue` namespace exports pure scheduling transitions and root-level state, pending-entry, line and option types. Hosts provide a seed, time, expiry descriptors and a pure eligibility callback. The framework owns selection, queues, interruption, once history and cooldowns; the host owns content and all playback/lifecycle adapters. See [Dialogue scheduling](dialogue.md) for usage, snapshot semantics and verification.
 
 ## Phaser integration and configuration
 

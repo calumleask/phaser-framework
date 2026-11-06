@@ -1,4 +1,11 @@
 import framework, {
+  type ScheduledLine,
+  type SchedulerOptions,
+  type DialoguePriority,
+  type DialogueTrigger,
+  type PendingDialogue,
+  type DialogueDirectorState,
+  type DialogueTransition,
   type InputKeyEvent,
   type InputResetEvent,
   type Meter,
@@ -164,3 +171,59 @@ class ConsumerScene extends framework.Scene {
 }
 
 void ConsumerScene;
+
+type NpcLine = ScheduledLine & { readonly speaker: string };
+const priority: DialoguePriority = 'normal';
+const npcLines: readonly NpcLine[] = [
+  {
+    id: 'npc.greeting',
+    scenario: 'greeting',
+    trigger: 'nearby',
+    priority,
+    cooldownSeconds: 2,
+    once: false,
+    expirySeconds: 10,
+    speaker: 'Guide',
+  },
+];
+const schedulerOptions: SchedulerOptions<NpcLine, { nearby: boolean }> = {
+  queueLimit: 3,
+  globalCooldownSeconds: 1,
+  eligible: (_line, context) => context.nearby,
+};
+const dialogueEvent: DialogueTrigger<{ nearby: boolean }> = {
+  trigger: 'nearby',
+  nowSeconds: 0,
+  context: { nearby: true },
+};
+let dialogueState: DialogueDirectorState =
+  framework.Dialogue.createDialogueDirectorState(42);
+const dialogueTransition: DialogueTransition =
+  framework.Dialogue.triggerDialogue(
+    npcLines,
+    dialogueState,
+    dialogueEvent,
+    schedulerOptions,
+  );
+dialogueState = dialogueTransition.state;
+const pending: PendingDialogue | null = dialogueState.active;
+const npc: NpcLine | null = framework.Dialogue.activeDialogueLine(
+  npcLines,
+  dialogueState,
+);
+const speaker: string | undefined = npc?.speaker;
+dialogueState = framework.Dialogue.expireStaleDialogue(
+  npcLines,
+  dialogueState,
+  1,
+  schedulerOptions,
+);
+dialogueState = framework.Dialogue.finishActiveDialogue(
+  npcLines,
+  dialogueState,
+  2,
+  schedulerOptions,
+).state;
+void pending;
+void speaker;
+void dialogueState;

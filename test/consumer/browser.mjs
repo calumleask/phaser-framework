@@ -37,6 +37,60 @@ try {
     'Framework and host must use the same Phaser.Scene class',
   );
 
+  stage = 'packed dialogue API';
+  const { Dialogue } = framework;
+  const npc = {
+    id: 'npc',
+    scenario: 'greeting',
+    trigger: 'nearby',
+    priority: 'normal',
+    cooldownSeconds: 2,
+    once: true,
+    expirySeconds: 10,
+  };
+  const dialogueOptions = {
+    queueLimit: 3,
+    globalCooldownSeconds: 1,
+    eligible: (_line, nearby) => nearby,
+  };
+  let dialogueState = Dialogue.triggerDialogue(
+    [npc],
+    Dialogue.createDialogueDirectorState(42),
+    { trigger: 'nearby', nowSeconds: 0, context: true },
+    dialogueOptions,
+  ).state;
+  check(
+    Dialogue.activeDialogueLine([npc], dialogueState) === npc,
+    'Packed dialogue lost line identity',
+  );
+  check(
+    dialogueState.randomState === 1083814273 &&
+      dialogueState.active.expiresAtSeconds === 10,
+    'Packed dialogue state changed',
+  );
+  dialogueState = Dialogue.expireStaleDialogue(
+    [npc],
+    dialogueState,
+    10,
+    dialogueOptions,
+  );
+  check(dialogueState.active === null, 'Packed dialogue expiry failed');
+  dialogueState = Dialogue.finishActiveDialogue(
+    [npc],
+    dialogueState,
+    11,
+    dialogueOptions,
+  ).state;
+  check(
+    Dialogue.triggerDialogue(
+      [npc],
+      dialogueState,
+      { trigger: 'nearby', nowSeconds: 12, context: true },
+      dialogueOptions,
+    ).state.active === null,
+    'Packed dialogue once history lost',
+  );
+
   stage = 'packed audio API';
   const { Audio } = framework;
   const meter = { numerator: 4, denominator: 4 };
