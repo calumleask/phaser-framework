@@ -1,3 +1,11 @@
 {
-  "presets": ["@babel/typescript", "@babel/env"]
+  "presets": ["@babel/typescript", "@babel/env"],
+  "overrides": [
+    {
+      "test": "./src/geometry/StaticBoxIndex.ts",
+      "presets": [
+        ["@babel/env", { "exclude": ["@babel/plugin-transform-for-of"] }]
+      ]
+    }
+  ]
 }

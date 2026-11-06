@@ -14,6 +14,7 @@ import {
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import process from 'node:process';
+import { pathToFileURL } from 'node:url';
 import webpack from 'webpack';
 
 const root = resolve(import.meta.dirname, '../..');
@@ -147,6 +148,13 @@ try {
   assert.ok(existsSync(join(packageRoot, manifest.module)));
   assert.ok(existsSync(join(packageRoot, manifest.types)));
   assert.ok(!existsSync(join(packageRoot, 'types/phfw.d.ts')));
+  const { StaticBoxIndex } = await import(
+    pathToFileURL(join(packageRoot, 'dist/geometry.mjs')).href
+  );
+  const boxes = [{ left: -1, right: 1, top: -1, bottom: 1, tag: 'node' }];
+  const index = new StaticBoxIndex(boxes, 16);
+  assert.equal(index.query(1, 1, 1, 1)[0], boxes[0]);
+  assert.equal(index.boxes, boxes);
 
   copyFileSync(
     join(import.meta.dirname, 'fixture.ts'),

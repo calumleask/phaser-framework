@@ -2,9 +2,9 @@
 
 ## Role and entry point
 
-This repository builds a reusable Phaser library, not a complete game. A consuming application creates `Phaser.Game`, configures the renderer and scale manager, registers scenes, and owns startup. The source entry is [`src/index.ts`](../src/index.ts), which default-exports an object with `Audio`, `Dialogue`, `Core`, `Input`, `Objects`, and `Scene` namespaces. Core, input, and object modules expose their current classes through their `index.ts` files.
+This repository builds a reusable Phaser library, not a complete game. A consuming application creates `Phaser.Game`, configures the renderer and scale manager, registers scenes, and owns startup. The source entry is [`src/index.ts`](../src/index.ts), which default-exports an object with `Audio`, `Dialogue`, `Geometry`, `Core`, `Input`, `Objects`, and `Scene` namespaces. Core, input, and object modules expose their current classes through their `index.ts` files.
 
-The package advertises `dist/phfw.js` as `main`, built `dist/phfw.mjs` as `module`, and generated `dist/types/index.d.ts` as `types`. Webpack produces a UMD library named `phfw`; its browser API is under `phfw.default` to preserve the existing default-export shape. Bundlers select the ESM build, where `import framework from 'phaser-framework'` yields the API object. An isolated packed-package fixture verifies both paths and the generated public types. There is no handwritten declaration or raw-TypeScript module entry.
+The package advertises `dist/phfw.js` as `main`, built `dist/phfw.mjs` as `module`, and generated `dist/types/index.d.ts` as `types`. Webpack produces a UMD library named `phfw`; its browser API is under `phfw.default` to preserve the existing default-export shape. Bundlers select the ESM build, where `import framework from 'phaser-framework'` yields the API object. An isolated packed-package fixture verifies both paths and the generated public types. There is no handwritten declaration or raw-TypeScript module entry. The ESM build additionally emits pure `dist/geometry.mjs` and its map. The root ESM imports this same module for `Geometry`; Consumers can import it as `phaser-framework/geometry` without Phaser or browser globals, with types from `dist/types/geometry/index.d.ts`. UMD continues bundling the class.
 
 ## Audio
 
@@ -13,6 +13,14 @@ The additive `Audio` namespace exports `MusicTransport`, `MusicLayerMixer`, `TIC
 ## Dialogue
 
 The additive `Dialogue` namespace exports pure scheduling transitions and root-level state, pending-entry, line and option types. Hosts provide a seed, time, expiry descriptors and a pure eligibility callback. The framework owns selection, queues, interruption, once history and cooldowns; the host owns content and all playback/lifecycle adapters. See [Dialogue scheduling](dialogue.md) for usage, snapshot semantics and verification.
+
+## Geometry
+
+The additive `Geometry.StaticBoxIndex<T extends Bounds>` indexes caller-owned
+static rectangles without Phaser or scene resources. The root exports the
+`Bounds` type. Queries preserve original rectangle references, duplicate input
+positions and bucket traversal order. See [Static rectangle index](geometry.md)
+for ownership, edge cases, usage and extraction evidence.
 
 ## Phaser integration and configuration
 

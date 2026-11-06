@@ -1,4 +1,6 @@
+import { StaticBoxIndex as PackageStaticBoxIndex } from 'phaser-framework/geometry';
 import framework, {
+  type Bounds,
   type ScheduledLine,
   type SchedulerOptions,
   type DialoguePriority,
@@ -19,6 +21,12 @@ import framework, {
   type LayerChange,
 } from 'phaser-framework';
 import type * as Phaser from 'phaser';
+
+const packageIndex = new PackageStaticBoxIndex(
+  [{ left: 0, right: 1, top: 0, bottom: 1 }],
+  16,
+);
+void packageIndex;
 
 const scale = new framework.Core.GameScaleManager(320, 240, 1, 480, 240);
 const ratio: number = scale.getAssetScaleRatio();
@@ -227,3 +235,16 @@ dialogueState = framework.Dialogue.finishActiveDialogue(
 void pending;
 void speaker;
 void dialogueState;
+
+type TaggedBounds = Bounds & { readonly tag: string };
+const rectangles: readonly TaggedBounds[] = [
+  { left: -10, right: 10, top: 0, bottom: 20, tag: 'host metadata' },
+];
+const rectangleIndex = new framework.Geometry.StaticBoxIndex(rectangles, 16);
+const hits: readonly TaggedBounds[] = rectangleIndex.query(10, 10, 20, 20);
+const originalRectangles: readonly TaggedBounds[] = rectangleIndex.boxes;
+const metadata: string | undefined = hits[0]?.tag;
+const bucketSize: number = rectangleIndex.bucketSize;
+const referenceCount: number = rectangleIndex.referenceCount;
+const bucketCount: number = rectangleIndex.bucketCount;
+void [originalRectangles, metadata, bucketSize, referenceCount, bucketCount];

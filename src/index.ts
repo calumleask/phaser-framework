@@ -1,9 +1,12 @@
 import * as Audio from './audio';
 import * as Dialogue from './dialogue';
+import * as Geometry from './geometry';
 import * as Core from './core';
 import * as Input from './input';
 import * as Objects from './objects';
 import { Scene } from './Scene';
+
+export type { Bounds } from './geometry';
 
 export type { InputKeyEvent, InputResetEvent } from './input';
 
@@ -32,6 +35,7 @@ export type {
 const phfw = {
   Audio,
   Dialogue,
+  Geometry,
   Core,
   Input,
   Objects,

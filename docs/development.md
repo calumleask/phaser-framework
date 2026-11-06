@@ -26,6 +26,18 @@ The production script cleans `dist` once before both Webpack outputs and declara
 
 TypeScript 6.0.3 checks browser source and emits declarations; Babel and Webpack still build JavaScript. The base `tsconfig.json` explicitly keeps ES2022, ESNext modules, Bundler resolution, DOM libraries, no ambient package types, and strict checking. `tsconfig.types.json` pins `rootDir` to `src` because [TypeScript 6 changed its default](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html#rootdir-now-defaults-to-). No deprecated compiler option or `ignoreDeprecations` escape is used. Keep the generated `dist/types/index.d.ts` path aligned with the `types` entry in `package.json`.
 
+The Babel configuration preserves native for-of iteration specifically in
+`src/geometry/StaticBoxIndex.ts`. Its default iterator compatibility helper
+caused a measured steady-state query regression during extraction. Other
+modules retain their existing transforms. Keep this scoped exclusion and rerun
+the geometry query benchmark when changing the compiler or minifier; see
+[Geometry](geometry.md) for the contract and evidence.
+
+The ESM build also emits `dist/geometry.mjs` and its source map as a pure
+geometry entry. The root ESM namespace imports it, sharing constructor identity.
+Keep this file with the root bundle when packaging; the packed consumer loads
+it directly in Node without Phaser and checks browser root types/exports.
+
 ## Extending the framework
 
 ### Add a scene

@@ -50,5 +50,18 @@
   "types": "./dist/types/index.d.ts",
   "peerDependencies": {
     "phaser": "4.2.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/phfw.mjs",
+      "require": "./dist/phfw.js"
+    },
+    "./geometry": {
+      "types": "./dist/types/geometry/index.d.ts",
+      "import": "./dist/geometry.mjs"
+    },
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
   }
 }

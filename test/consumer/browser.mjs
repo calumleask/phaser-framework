@@ -37,6 +37,24 @@ try {
     'Framework and host must use the same Phaser.Scene class',
   );
 
+  stage = 'packed geometry API';
+  const rectangle = { left: -10, right: 10, top: 0, bottom: 20, tag: 'host' };
+  const rectangles = [rectangle, rectangle];
+  const index = new framework.Geometry.StaticBoxIndex(rectangles, 16);
+  const found = index.query(10, 10, 20, 20);
+  check(
+    index.boxes === rectangles && index.query(NaN, 0, 0, 0) === rectangles,
+    'Packed geometry must retain array identity',
+  );
+  check(
+    found.length === 2 && found[0] === rectangle && found[1] === rectangle,
+    'Packed geometry lost inclusive bounds, metadata or duplicate input identities',
+  );
+  check(
+    index.bucketCount === 4 && index.referenceCount === 8,
+    'Packed geometry bucket counters changed',
+  );
+
   stage = 'packed dialogue API';
   const { Dialogue } = framework;
   const npc = {

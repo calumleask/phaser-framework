@@ -1,14 +1,18 @@
+const path = require('path');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
 
 module.exports = merge(common, {
+  entry: {
+    geometry: path.resolve(__dirname, 'src/geometry/index.ts'),
+  },
   mode: 'production',
   devtool: 'source-map',
   experiments: {
     outputModule: true,
   },
   output: {
-    filename: 'phfw.mjs',
+    filename: '[name].mjs',
     library: {
       type: 'module',
     },
@@ -17,5 +21,6 @@ module.exports = merge(common, {
   externalsType: 'module',
   externals: {
     phaser: 'phaser',
+    './geometry': './geometry.mjs',
   },
 });
